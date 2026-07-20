@@ -109,6 +109,32 @@
   .badge.outline{background:#fff; color:#6A6A6A; border:1px solid var(--line);}
   .row-actions{display:flex; align-items:center; justify-content:flex-end; gap:8px; padding-right:14px;}
   .empty{padding:40px; text-align:center; color:var(--placeholder);}
+
+  /* Filter modal (ODS Standard Card + Dropdowns) */
+  .modal-backdrop{position:fixed; inset:0; background:rgba(20,20,20,.45); display:none; align-items:flex-start; justify-content:center; z-index:100; padding:96px 20px 20px;}
+  .modal-backdrop.open{display:flex;}
+  .filter-card{background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 16px 40px rgba(0,0,0,.20); width:864px; max-width:100%; padding:16px 20px 20px;}
+  .fc-head{display:flex; align-items:center; justify-content:space-between;}
+  .fc-head .title{font-size:14px; font-weight:700; color:#141414;}
+  .fc-head .clear{font-size:13px; font-weight:700; color:var(--brand); background:none; border:0; cursor:pointer; padding:0;}
+  .fc-sub{font-size:14px; color:#141414; margin:10px 0 12px;}
+  .cond{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+  .connector{margin-bottom:8px;}
+  .remove-btn{background:none; border:0; cursor:pointer; color:#D0021B; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; padding:0; margin-left:2px;}
+  .add-cond{margin-top:4px;}
+  .dd{position:relative;}
+  .dd-control{display:flex; align-items:center; justify-content:space-between; gap:8px; height:28px; padding:0 10px; background:#fff; border:1px solid var(--line); border-radius:4px; cursor:pointer; font-size:14px; color:var(--text); user-select:none;}
+  .dd-control > span:first-child{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .dd-control.placeholder{color:var(--placeholder);}
+  .dd-control .ic{color:var(--icon);}
+  .dd-field{width:330px;} .dd-op{width:130px;} .dd-value{width:330px;} .dd-conn{width:72px;}
+  .dd-menu{position:absolute; top:calc(100% + 4px); left:0; min-width:100%; background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.14); padding:4px 0; z-index:10; display:none;}
+  .dd.open .dd-menu{display:block;}
+  .dd-menu .dd-head{font-size:10px; font-weight:500; letter-spacing:.2px; color:var(--placeholder); text-transform:uppercase; padding:8px 12px 4px;}
+  .dd-item{display:flex; align-items:center; justify-content:space-between; gap:8px; height:34px; padding:0 12px; font-size:14px; color:#141414; cursor:pointer;}
+  .dd-item:hover{background:#F4F7FF;}
+  .dd-item.selected{color:var(--brand);}
+  .dd-item .ic{color:var(--brand);}
   @media (max-width:1100px){ .sidebar{display:none;} .search{max-width:none;} }
 </style>
 </head>
@@ -160,7 +186,7 @@
             <span class="ic" data-ic="search"></span>
             <input id="search" placeholder="Search activity" />
           </div>
-          <button class="btn sm"><span class="ic" data-ic="filter"></span>Filter</button>
+          <button class="btn sm" id="filter-btn"><span class="ic" data-ic="filter"></span>Filter</button>
         </div>
         <div class="ca-right">
           <button class="btn sm primary"><span class="ic" data-ic="export"></span>Export Member Details</button>
@@ -191,6 +217,18 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="filter-modal">
+  <div class="filter-card" id="filter-card">
+    <div class="fc-head">
+      <span class="title">Filters</span>
+      <button class="clear" id="clear-filters">Clear all filters</button>
+    </div>
+    <div class="fc-sub">Filter by</div>
+    <div id="conditions"></div>
+    <button class="btn sm primary add-cond" id="add-cond"><span class="ic" data-ic="plus"></span>Add Condition</button>
+  </div>
+</div>
+
 <script>
 const ICONS = {
   search:'<svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.12041 1C3.7402 1 1 3.7402 1 7.12041C1 10.5006 3.7402 13.2408 7.12041 13.2408C8.50595 13.2408 9.78442 12.7802 10.8103 12.0039L13.8064 15L15 13.8064L12.0039 10.8103C12.7802 9.78442 13.2408 8.50595 13.2408 7.12041C13.2408 3.7402 10.5006 1 7.12041 1ZM2.68794 7.12041C2.68794 4.67243 4.67243 2.68794 7.12041 2.68794C9.5684 2.68794 11.5529 4.67243 11.5529 7.12041C11.5529 9.5684 9.5684 11.5529 7.12041 11.5529C4.67243 11.5529 2.68794 9.5684 2.68794 7.12041Z"/></svg>',
@@ -209,7 +247,9 @@ const ICONS = {
   collapse:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.25 10.8889V5.11111L8.36111 8L11.25 10.8889ZM2.94444 13.0556H5.11111V2.94444H2.94444V13.0556ZM6.55556 13.0556H13.0556V2.94444H6.55556V13.0556ZM1.5 14.5V1.5H14.5V14.5H1.5Z"/></svg>',
   grid:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.07116 1.5H1.5V5.21411H7.07116V1.5Z"/><path d="M7.07116 7.07115H1.5V14.5H7.07116V7.07115Z"/><path d="M14.4994 1.5H8.9282V8.92887H14.4994V1.5Z"/><path d="M14.5 10.7853H8.92884V14.4994H14.5V10.7853Z"/></svg>',
   list:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 2.5h3v3h-3zM6 3h8.5v2H6zM1.5 6.5h3v3h-3zM6 7h8.5v2H6zM1.5 10.5h3v3h-3zM6 11h8.5v2H6z"/></svg>',
-  chevron:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 3.5l5 4.5-5 4.5-.9-1L9.2 8 5.1 4.5z"/></svg>',
+  chevron:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 6l3.5 3.5L11.5 6l-.9-.9L8 7.7 5.4 5.1z"/></svg>',
+  check:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.3 11.6L2.7 8l1.13-1.13 2.47 2.47 5.87-5.87L13.3 4.6z"/></svg>',
+  remove:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="6.4"/><path d="M5.2 8h5.6" stroke-linecap="round"/></svg>',
 };
 
 const DATA = [
@@ -245,7 +285,7 @@ function badgeHtml(status){
 }
 function render(){
   const q = (document.getElementById('search').value||'').toLowerCase();
-  let rows = DATA.filter(d=> !q || [d.id,d.type,d.template,d.object,d.user,d.start,d.statusText].join(' ').toLowerCase().includes(q));
+  let rows = DATA.filter(d=> (!q || [d.id,d.type,d.template,d.object,d.user,d.start,d.statusText].join(' ').toLowerCase().includes(q)) && matchConditions(d));
   rows.sort((a,b)=>{
     let av = sortKey==="start"? a._sort : (sortKey==="id"? a.id : String(a[sortKey]).toLowerCase());
     let bv = sortKey==="start"? b._sort : (sortKey==="id"? b.id : String(b[sortKey]).toLowerCase());
@@ -287,6 +327,68 @@ document.querySelectorAll('th.sortable').forEach(th=>{
 });
 document.getElementById('search').addEventListener('input', render);
 document.getElementById('chk-all').addEventListener('change', e=>{ document.querySelectorAll('.row-chk').forEach(c=>c.checked = e.target.checked); });
+
+/* ---- Filter builder (ODS Standard Card) ---- */
+const FIELDS=[{key:'id',label:'ID'},{key:'type',label:'Type'},{key:'template',label:'Template'},{key:'object',label:'Object'},{key:'user',label:'User'},{key:'start',label:'Start'},{key:'statusText',label:'Status'}];
+const OPERATORS=['Contains','Does not contain','Equals'];
+let conditions=[{field:'',op:'Contains',value:'',connector:'and'}];
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function fieldLabel(k){const f=FIELDS.find(f=>f.key===k);return f?f.label:'';}
+function fieldKey(l){const f=FIELDS.find(f=>f.label===l);return f?f.key:'';}
+function distinctValues(k){if(!k)return [];return [...new Set(DATA.map(d=>String(d[k])))].sort();}
+function matchConditions(d){
+  const act=conditions.filter(c=>c.field&&c.value);
+  if(!act.length) return true;
+  let res=null;
+  act.forEach(c=>{
+    const v=String(d[c.field]).toLowerCase(), cv=c.value.toLowerCase();
+    const m = c.op==='Contains'? v.includes(cv) : c.op==='Does not contain'? !v.includes(cv) : v===cv;
+    res = res===null? m : (c.connector==='or'? (res||m) : (res&&m));
+  });
+  return res;
+}
+function dd(type,i,value,placeholder,head,options){
+  const ph=!value;
+  const menu='<div class="dd-menu">'+(head?'<div class="dd-head">'+head+'</div>':'')+
+    options.map(o=>'<div class="dd-item'+(o===value?' selected':'')+'" data-val="'+esc(o)+'">'+esc(o)+(o===value?'<span class="ic" data-ic="check"></span>':'')+'</div>').join('')+'</div>';
+  return '<div class="dd dd-'+type+'" data-cond="'+i+'" data-type="'+type+'">'+
+    '<div class="dd-control'+(ph?' placeholder':'')+'"><span>'+esc(value||placeholder)+'</span><span class="ic" data-ic="chevron"></span></div>'+menu+'</div>';
+}
+function renderConditions(){
+  let html='';
+  conditions.forEach((c,i)=>{
+    if(i>0) html+='<div class="connector">'+dd('conn',i,c.connector,'and','',['and','or'])+'</div>';
+    html+='<div class="cond">'+
+      dd('field',i,fieldLabel(c.field),'Select Field Name','FIELD NAME',FIELDS.map(f=>f.label))+
+      dd('op',i,c.op,'Contains','OPERATORS',OPERATORS)+
+      dd('value',i,c.value,'Select Value','VALUE',distinctValues(c.field))+
+      (conditions.length>1?'<button class="remove-btn" data-remove="'+i+'"><span class="ic" data-ic="remove"></span></button>':'')+
+      '</div>';
+  });
+  const cont=document.getElementById('conditions');
+  cont.innerHTML=html; injectIcons(cont);
+}
+function closeMenus(){document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));}
+document.getElementById('filter-btn').addEventListener('click',()=>{renderConditions();document.getElementById('filter-modal').classList.add('open');});
+document.getElementById('filter-modal').addEventListener('click',e=>{if(e.target.id==='filter-modal')e.currentTarget.classList.remove('open');});
+document.getElementById('add-cond').addEventListener('click',()=>{conditions.push({field:'',op:'Contains',value:'',connector:'and'});renderConditions();});
+document.getElementById('clear-filters').addEventListener('click',()=>{conditions=[{field:'',op:'Contains',value:'',connector:'and'}];renderConditions();render();});
+document.getElementById('conditions').addEventListener('click',e=>{
+  const rm=e.target.closest('.remove-btn');
+  if(rm){conditions.splice(+rm.dataset.remove,1);renderConditions();render();return;}
+  const ctrl=e.target.closest('.dd-control');
+  if(ctrl){const d=ctrl.parentElement,open=d.classList.contains('open');closeMenus();if(!open)d.classList.add('open');e.stopPropagation();return;}
+  const item=e.target.closest('.dd-item');
+  if(item){const d=item.closest('.dd'),i=+d.dataset.cond,type=d.dataset.type,val=item.dataset.val;
+    if(type==='field'){conditions[i].field=fieldKey(val);conditions[i].value='';}
+    else if(type==='op')conditions[i].op=val;
+    else if(type==='value')conditions[i].value=val;
+    else if(type==='conn')conditions[i].connector=val;
+    closeMenus();renderConditions();render();}
+});
+document.addEventListener('click',closeMenus);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenus();document.getElementById('filter-modal').classList.remove('open');}});
+
 injectIcons(document);
 updateHeaders();
 render();
