@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lifecycle Management (LCM) — Activity Log</title>
+<link rel="icon" href="logo.png" />
+<style>
+  @font-face{font-family:'OneStream Sans';src:url('fonts/OneStreamSans-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
+  @font-face{font-family:'OneStream Sans';src:url('fonts/OneStreamSans-Medium.otf') format('opentype');font-weight:500;font-style:normal;font-display:swap;}
+  @font-face{font-family:'OneStream Sans';src:url('fonts/OneStreamSans-Bold.otf') format('opentype');font-weight:700;font-style:normal;font-display:swap;}
+  :root{
+    --brand:#0A5DFF; --brand-hover:#0847c9;
+    --text:#141414; --text-2:#373737; --text-3:#6E6E6E; --text-muted:#8A8A8A;
+    --bg:#FAFAFA; --surface:#FFFFFF; --sidebar:#171717;
+    --border:#E6E6E6; --btn-border:#BDBDBD; --field-border:#D9D9D9; --divider:#EFEFEF; --field:#F3F3F3;
+    --err-bg:#F9E8EB; --err-fg:#890C1D;
+    --ok-bg:#E6F5EE; --ok-fg:#005B34;
+    --warn-bg:#FFF2E6; --warn-fg:#934B01;
+    --neutral-bg:#EEEEEE; --neutral-fg:#373737;
+    --sidebar-w:260px; --header-h:72px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'OneStream Sans', Arial, Helvetica, sans-serif; color:var(--text); background:var(--bg); -webkit-font-smoothing:antialiased;}
+  button{font-family:inherit; cursor:pointer;}
+  .app{display:flex; min-height:100vh;}
+
+  /* Sidebar */
+  .sidebar{width:var(--sidebar-w); flex:0 0 var(--sidebar-w); background:var(--sidebar); color:#fff; display:flex; flex-direction:column; position:sticky; top:0; height:100vh;}
+  .hamburger{padding:22px 24px 0; display:flex; flex-direction:column; gap:5px;}
+  .hamburger span{width:22px; height:2px; background:#E6E6E6; border-radius:2px;}
+  .brand{display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 0 20px;}
+  .brand .logo{width:96px; height:96px; border-radius:50%; overflow:hidden;}
+  .brand .logo img{width:100%; height:100%; display:block; object-fit:cover;}
+  .brand .name{font-weight:700; font-size:17px;}
+  .nav{flex:1; padding:8px 12px;}
+  .nav a{display:flex; align-items:center; gap:12px; padding:0 8px; height:40px; border-radius:8px; color:#C0C0C0; text-decoration:none; font-size:14px; font-weight:500;}
+  .nav a .chev{margin-left:auto; opacity:.55;}
+  .nav a:hover{background:rgba(255,255,255,.06); color:#fff;}
+  .nav a.active{background:#fff; color:var(--text); font-weight:700;}
+  .nav .cat{font-size:10.5px; font-weight:700; letter-spacing:.06em; color:#7C7C7C; padding:16px 8px 6px;}
+  .nav a.active svg{stroke:var(--text);}
+  .sidebar .foot{display:flex; align-items:center; gap:10px; padding:16px 20px; color:#BDBDBD; font-size:13px;}
+  .sidebar .foot .ver{color:#8A8A8A; font-size:11px;}
+
+  /* Main */
+  .main{flex:1; min-width:0; display:flex; flex-direction:column;}
+  .topbar{height:var(--header-h); background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; padding:0 20px;}
+  .topbar .title{font-weight:700; font-size:18px; white-space:nowrap;}
+  .search{display:flex; align-items:center; gap:10px; background:var(--field); border-radius:8px; height:44px; padding:0 16px; color:var(--text-muted); flex:1; max-width:640px; margin:0 auto;}
+  .search input{border:0; background:transparent; outline:none; font-size:14px; color:var(--text); width:100%; font-family:inherit;}
+  .search input::placeholder{color:var(--text-muted);}
+  .btn{display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border-radius:4px; border:1px solid var(--btn-border); background:#fff; color:var(--text); font-size:14px; font-weight:700; white-space:nowrap;}
+  .btn:hover{background:#f7f7f7;}
+  .btn.primary{background:var(--brand); border-color:var(--brand); color:#fff;}
+  .btn.primary:hover{background:var(--brand-hover);}
+  .btn.sm{height:28px; padding:0 11px; font-size:12px; gap:6px; border-radius:4px;}
+  .btn.sm svg{width:15px;height:15px; color:var(--brand);}
+  .avatar{width:38px;height:38px;border-radius:50%;background:#F0F0F0;border:1px solid #CFCFCF;display:flex;align-items:center;justify-content:center;color:#5a5a5a; flex:0 0 auto;}
+
+  .content{padding:20px 24px; flex:1;}
+  .page-head{display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:16px; flex-wrap:wrap;}
+  .page-head h1{font-size:24px; margin:0 0 6px; font-weight:700;}
+  .page-head p{margin:0; color:var(--text-3); font-size:13px; max-width:650px; line-height:18px;}
+  .tools{display:flex; align-items:center; gap:12px;}
+  .field{display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--field-border); border-radius:8px; height:40px; padding:0 14px; color:var(--text-muted); width:240px;}
+  .field input{border:0;background:transparent;outline:none;font-size:14px;color:var(--text);width:100%; font-family:inherit;}
+  .field input::placeholder{color:var(--text-muted);}
+
+  /* Table */
+  .table-wrap{border:1px solid var(--border); border-radius:8px; overflow:hidden; background:#fff;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  thead th{background:#F7F7F7; text-align:left; font-weight:700; color:#333; padding:0 10px; height:46px; border-bottom:1px solid var(--border); white-space:nowrap; user-select:none;}
+  thead th.sortable{cursor:pointer;}
+  thead th .th{display:flex; align-items:center; gap:6px;}
+  thead th .filter{opacity:.5; margin-left:2px;}
+  thead th.active{color:var(--brand);}
+  thead th.active .filter{opacity:1;}
+  thead th .dir{display:inline-flex;}
+  tbody td{padding:0 10px; height:40px; border-bottom:1px solid var(--divider); white-space:nowrap; color:var(--text-2); vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:0;}
+  tbody tr:hover{background:#FAFBFF;}
+  td.id a{color:var(--brand); font-weight:700; text-decoration:none;}
+  td.id a:hover{text-decoration:underline;}
+  td.tmpl{max-width:340px; overflow:hidden; text-overflow:ellipsis;}
+  .col-chk{width:44px; text-align:center;}
+  input[type=checkbox]{width:16px;height:16px; accent-color:var(--brand); cursor:pointer;}
+  .badges{display:flex; align-items:center; gap:6px;}
+  .badge{display:inline-flex; align-items:center; gap:4px; height:20px; padding:0 8px; border-radius:10px; font-size:11px; font-weight:700; white-space:nowrap;}
+  .badge.error{background:var(--err-bg); color:var(--err-fg);}
+  .badge.success{background:var(--ok-bg); color:var(--ok-fg);}
+  .badge.warning{background:var(--warn-bg); color:var(--warn-fg);}
+  .badge.neutral{background:var(--neutral-bg); color:var(--neutral-fg);}
+  .badge.outline{background:#fff; color:#6A6A6A; border:1px solid var(--field-border);}
+  .row-actions{display:flex; align-items:center; justify-content:flex-end; gap:8px;}
+  .cols-btn{margin-left:auto;}
+  .toolbar-right{display:flex; align-items:center; gap:8px;}
+  .empty{padding:40px; text-align:center; color:var(--text-muted);}
+  @media (max-width:1100px){ .sidebar{display:none;} .search{max-width:none;} }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="hamburger"><span></span><span></span><span></span></div>
+    <div class="brand">
+      <div class="logo"><img src="logo.png" alt="Kopi-O" width="96" height="96" /></div>
+      <div class="name">Kopi-O</div>
+    </div>
+    <nav class="nav">
+      <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Home</a>
+      <div class="cat">MIGRATIONS</div>
+      <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Open<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+      <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>Closed<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+      <div class="cat">ACTIVITY</div>
+      <a href="#" class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>Activity Log</a>
+      <div class="cat">TEMPLATE MANAGEMENT</div>
+      <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 13h5M10 16h5"/></svg>Templates</a>
+    </nav>
+    <div class="foot">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M7 15l10-6"/></svg>
+      <span>onestream</span><span class="ver">Version 0.1</span>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <div class="title">Lifecycle Management (Product Mockup)</div>
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4-4"/></svg>
+        <input placeholder="Search user, environment, application, dimension…" />
+      </div>
+      <div class="toolbar-right">
+        <button class="btn primary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Create</button>
+        <button class="btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.7 5.1 5.1 1.7-5.1 1.7L12 16.6l-1.7-5.1L5.2 9.8l5.1-1.7z"/></svg>Ask</button>
+        <button class="btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18h5M10 21h4M12 3a6 6 0 0 0-3.8 10.6c.6.5 1.3 1.4 1.3 2.4h5c0-1 .7-1.9 1.3-2.4A6 6 0 0 0 12 3z"/></svg>Intent</button>
+        <div class="avatar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="9" r="3.4"/><path d="M5.5 20c0-3.6 3-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/></svg></div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1>Activity Log</h1>
+          <p>View all closed migrations, individual activity, and member-level details. Sort and reorder columns, search, filter, and export content.</p>
+        </div>
+        <div class="tools">
+          <div class="field">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4-4"/></svg>
+            <input id="search" placeholder="Search activity" />
+          </div>
+          <button class="btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3a3a3a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.2 7.2V19l-3.6-2v-4.8z"/></svg>Filter<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a3a3a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+          <button class="btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3a3a3a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 15.5h5"/></svg>Export Member Details</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-chk"><input type="checkbox" id="chk-all" /></th>
+              <th class="sortable" data-key="id"><span class="th">ID <span class="dir"></span><svg class="filter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.2 7.2V19l-3.6-2v-4.8z"/></svg></span></th>
+              <th class="sortable" data-key="type"><span class="th">Type <span class="dir"></span><svg class="filter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.2 7.2V19l-3.6-2v-4.8z"/></svg></span></th>
+              <th class="sortable" data-key="template"><span class="th">Template <span class="dir"></span><svg class="filter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.2 7.2V19l-3.6-2v-4.8z"/></svg></span></th>
+              <th class="sortable" data-key="object"><span class="th">Object <span class="dir"></span><svg class="filter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.2 7.2V19l-3.6-2v-4.8z"/></svg></span></th>
+              <th class="sortable" data-key="user"><span class="th">User <span class="dir"></span><svg class="filter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.2 7.2V19l-3.6-2v-4.8z"/></svg></span></th>
+              <th class="sortable active" data-key="start"><span class="th">Start <span class="dir"></span><svg class="filter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.2 7.2V19l-3.6-2v-4.8z"/></svg></span></th>
+              <th class="sortable" data-key="statusText"><span class="th">Status <span class="dir"></span><svg class="filter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.2 7.2V19l-3.6-2v-4.8z"/></svg></span></th>
+              <th style="text-align:right;"><button class="btn sm cols-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a3a3a" stroke-width="1.6"><rect x="4" y="5" width="16" height="14" rx="1.5"/><path d="M12 5v14M4 9h16"/></svg>Columns</button></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+const ACT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.2-8 4.2-8-4.2z"/><path d="M4 12l8 4.2 8-4.2"/></svg>';
+const MEM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><path d="M3.5 19c0-3 2.6-4.5 5.5-4.5s5.5 1.5 5.5 4.5"/><path d="M16 6.6a3 3 0 0 1 0 5.4"/><path d="M17 14.6c2.1.4 3.4 1.8 3.4 4.4"/></svg>';
+
+const DATA = [
+  {id:9202,type:"Compare",template:"DEMO: 100 members - failed (one member)",object:"ScenarioDim",user:"kbruns_admin",start:"07/20/2026, 9:00 AM",status:[["Validation Errors","error"]]},
+  {id:9203,type:"Compare",template:"DEMO: 100 members - failed (warnings only)",object:"Products",user:"blam",start:"07/20/2026, 9:00 AM",status:[["Validation Errors","error"]]},
+  {id:9501,type:"Migration",template:"Corp_Consol_Monthly PRD->DEV",object:"CorpEntities",user:"blam",start:"07/20/2026, 9:00 AM",status:[["Complete","success"]]},
+  {id:9503,type:"Migration",template:"Quarterly_Close_Accounts",object:"CorpAccounts",user:"blam",start:"07/20/2026, 9:00 AM",status:[["Complete","success"],["PARTIAL","warning"]]},
+  {id:9505,type:"Compare",template:"Scenarios Rate Refresh",object:"ScenarioDim",user:"blam",start:"07/20/2026, 9:00 AM",status:[["Validation Errors","error"]]},
+  {id:9507,type:"Compare",template:"Entity Move Batch",object:"Regions",user:"blam",start:"07/20/2026, 9:00 AM",status:[["Canceled","neutral"],["BY SYSTEM","outline"]]},
+  {id:9509,type:"Compare",template:"Cost Center Cleanup",object:"CorpAccounts",user:"blam",start:"07/20/2026, 9:00 AM",status:[["Canceled","neutral"],["BY USER","outline"]]},
+  {id:9502,type:"Migration",template:"HR_Entities Refresh",object:"CorpFlow",user:"kbruns_admin",start:"07/19/2026, 9:00 AM",status:[["Complete","success"]]},
+  {id:9504,type:"Migration",template:"UD2_Realignment_2026",object:"CorpEntities",user:"kbruns_admin",start:"07/19/2026, 9:00 AM",status:[["Complete","success"],["PARTIAL","warning"]]},
+  {id:9506,type:"Compare",template:"Account Restructure Q3",object:"Products",user:"kbruns_admin",start:"07/19/2026, 9:00 AM",status:[["Validation Errors","error"]]},
+  {id:9508,type:"Compare",template:"Product Hierarchy Sync",object:"CorpFlow",user:"kbruns_admin",start:"07/19/2026, 9:00 AM",status:[["Canceled","neutral"],["BY SYSTEM","outline"]]},
+  {id:9510,type:"Compare",template:"Legacy Entity Import",object:"Regions",user:"kbruns_admin",start:"07/19/2026, 9:00 AM",status:[["Canceled","neutral"],["EXPIRED","outline"]]},
+  {id:6833,type:"Compare",template:"Dimension Type Mismatch",object:"Products",user:"blam",start:"06/24/2026, 08:40 AM",status:[["Validation Errors","error"]]},
+  {id:6824,type:"Compare",template:"Reference Validation: Members Filter",object:"Products",user:"blam",start:"06/23/2026, 02:15 PM",status:[["Validation Errors","error"]]},
+];
+DATA.forEach(d=>{ d.statusText = d.status.map(s=>s[0]).join(" "); d._sort = Date.parse(d.start.replace(",","")) || 0; });
+
+let sortKey = "start", sortDir = -1;
+const ARROW_DOWN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 12l6 6 6-6"/></svg>';
+const ARROW_UP = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 12l6-6 6 6"/></svg>';
+
+function badgeHtml(status){
+  return '<div class="badges">'+status.map(([t,c])=>{
+    const warn = c==="warning" ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 15H3z"/><path d="M12 10v4"/><path d="M12 16.5h.01"/></svg>' : '';
+    return '<span class="badge '+c+'">'+warn+t+'</span>';
+  }).join('')+'</div>';
+}
+
+function render(){
+  const q = (document.getElementById('search').value||'').toLowerCase();
+  let rows = DATA.filter(d=> !q || [d.id,d.type,d.template,d.object,d.user,d.start,d.statusText].join(' ').toLowerCase().includes(q));
+  rows.sort((a,b)=>{
+    let av = sortKey==="start"? a._sort : (sortKey==="id"? a.id : String(a[sortKey]).toLowerCase());
+    let bv = sortKey==="start"? b._sort : (sortKey==="id"? b.id : String(b[sortKey]).toLowerCase());
+    return av<bv? -sortDir : av>bv? sortDir : 0;
+  });
+  const tb = document.getElementById('rows');
+  if(!rows.length){ tb.innerHTML = '<tr><td colspan="9" class="empty">No matching activity.</td></tr>'; return; }
+  tb.innerHTML = rows.map(d=>`
+    <tr>
+      <td class="col-chk"><input type="checkbox" class="row-chk"/></td>
+      <td class="id"><a href="#">${d.id}</a></td>
+      <td>${d.type}</td>
+      <td class="tmpl" title="${d.template}">${d.template}</td>
+      <td>${d.object}</td>
+      <td>${d.user}</td>
+      <td>${d.start}</td>
+      <td>${badgeHtml(d.status)}</td>
+      <td><div class="row-actions">
+        <button class="btn sm">${ACT}Activity</button>
+        <button class="btn sm">${MEM}Members</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function updateHeaders(){
+  document.querySelectorAll('th.sortable').forEach(th=>{
+    const active = th.dataset.key===sortKey;
+    th.classList.toggle('active', active);
+    th.querySelector('.dir').innerHTML = active ? (sortDir===1?ARROW_UP:ARROW_DOWN) : '';
+  });
+}
+
+document.querySelectorAll('th.sortable').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const k = th.dataset.key;
+    if(sortKey===k){ sortDir *= -1; } else { sortKey = k; sortDir = 1; }
+    updateHeaders(); render();
+  });
+});
+document.getElementById('search').addEventListener('input', render);
+document.getElementById('chk-all').addEventListener('change', e=>{
+  document.querySelectorAll('.row-chk').forEach(c=>c.checked = e.target.checked);
+});
+updateHeaders();
+render();
+</script>
+</body>
+</html>
