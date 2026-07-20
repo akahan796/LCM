@@ -113,7 +113,7 @@
   /* Filter modal (ODS Standard Card + Dropdowns) */
   .modal-backdrop{position:fixed; inset:0; background:transparent; display:none; z-index:100;}
   .modal-backdrop.open{display:block;}
-  .filter-card{position:fixed; background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 12px 32px rgba(0,0,0,.18); width:820px; max-width:calc(100vw - 32px); padding:16px 20px 20px;}
+  .filter-card{position:fixed; background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 12px 32px rgba(0,0,0,.18); width:560px; max-width:calc(100vw - 32px); padding:16px 20px 20px;}
   .fc-head{display:flex; align-items:center; justify-content:space-between;}
   .fc-head .title{font-size:14px; font-weight:700; color:#141414;}
   .fc-head .clear{font-size:13px; font-weight:700; color:var(--brand); background:none; border:0; cursor:pointer; padding:0;}
@@ -127,7 +127,13 @@
   .dd-control > span:first-child{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .dd-control.placeholder{color:var(--placeholder);}
   .dd-control .ic{color:var(--icon);}
-  .dd-field{width:330px;} .dd-op{width:130px;} .dd-value{width:330px;} .dd-conn{width:72px;}
+  .dd-control{width:100%;}
+  .cond .dd-field, .cond .dd-value{flex:1 1 0; min-width:0;} .cond .dd-op{flex:0 0 116px;} .dd-conn{width:72px;}
+  .filter-count{display:inline-flex; align-items:center; justify-content:center; min-width:16px; height:16px; padding:0 5px; border-radius:8px; background:var(--brand); color:#fff; font-size:11px; font-weight:700;}
+  .filter-chev{transition:transform .15s ease;}
+  #filter-btn.open{border-color:var(--brand); color:var(--brand);}
+  #filter-btn.open > .ic{color:var(--brand);}
+  #filter-btn.open .filter-chev{transform:rotate(180deg);}
   .dd-menu{position:absolute; top:calc(100% + 4px); left:0; min-width:100%; background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.14); padding:4px 0; z-index:10; display:none;}
   .dd.open .dd-menu{display:block;}
   .dd-menu .dd-head{font-size:10px; font-weight:500; letter-spacing:.2px; color:var(--placeholder); text-transform:uppercase; padding:8px 12px 4px;}
@@ -186,7 +192,7 @@
             <span class="ic" data-ic="search"></span>
             <input id="search" placeholder="Search activity" />
           </div>
-          <button class="btn sm" id="filter-btn"><span class="ic" data-ic="filter"></span>Filter</button>
+          <button class="btn sm" id="filter-btn"><span class="ic" data-ic="filter"></span>Filter<span class="filter-count" id="filter-count" style="display:none">0</span><span class="ic filter-chev" data-ic="chevron"></span></button>
         </div>
         <div class="ca-right">
           <button class="btn sm primary"><span class="ic" data-ic="export"></span>Export Member Details</button>
@@ -284,6 +290,7 @@ function badgeHtml(status){
   }).join('')+'</div>';
 }
 function render(){
+  updateFilterCount();
   const q = (document.getElementById('search').value||'').toLowerCase();
   let rows = DATA.filter(d=> (!q || [d.id,d.type,d.template,d.object,d.user,d.start,d.statusText].join(' ').toLowerCase().includes(q)) && matchConditions(d));
   rows.sort((a,b)=>{
@@ -369,11 +376,17 @@ function renderConditions(){
   cont.innerHTML=html; injectIcons(cont);
 }
 function closeMenus(){document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));}
+function updateFilterCount(){
+  const n=conditions.filter(c=>c.field&&c.value).length;
+  const b=document.getElementById('filter-count');
+  if(n>0){b.textContent=n;b.style.display='';}else{b.style.display='none';}
+}
 function openFilter(){
   renderConditions();
   const modal=document.getElementById('filter-modal');
-  modal.classList.add('open');
-  const r=document.getElementById('filter-btn').getBoundingClientRect();
+  const btn=document.getElementById('filter-btn');
+  modal.classList.add('open'); btn.classList.add('open');
+  const r=btn.getBoundingClientRect();
   const card=document.getElementById('filter-card');
   card.style.top=(r.bottom+6)+'px';
   const cw=card.offsetWidth;
@@ -381,12 +394,12 @@ function openFilter(){
   if(left+cw>window.innerWidth-16) left=window.innerWidth-16-cw;
   card.style.left=Math.max(16,left)+'px';
 }
+function closeFilter(){document.getElementById('filter-modal').classList.remove('open');document.getElementById('filter-btn').classList.remove('open');}
 document.getElementById('filter-btn').addEventListener('click',e=>{
   e.stopPropagation();
-  const modal=document.getElementById('filter-modal');
-  if(modal.classList.contains('open')){modal.classList.remove('open');}else{openFilter();}
+  if(document.getElementById('filter-modal').classList.contains('open')){closeFilter();}else{openFilter();}
 });
-document.getElementById('filter-modal').addEventListener('click',e=>{if(e.target.id==='filter-modal')e.currentTarget.classList.remove('open');});
+document.getElementById('filter-modal').addEventListener('click',e=>{if(e.target.id==='filter-modal')closeFilter();});
 document.getElementById('add-cond').addEventListener('click',()=>{conditions.push({field:'',op:'Contains',value:'',connector:'and'});renderConditions();});
 document.getElementById('clear-filters').addEventListener('click',()=>{conditions=[{field:'',op:'Contains',value:'',connector:'and'}];renderConditions();render();});
 document.getElementById('conditions').addEventListener('click',e=>{
@@ -403,7 +416,7 @@ document.getElementById('conditions').addEventListener('click',e=>{
     closeMenus();renderConditions();render();}
 });
 document.addEventListener('click',closeMenus);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenus();document.getElementById('filter-modal').classList.remove('open');}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenus();closeFilter();}});
 
 injectIcons(document);
 updateHeaders();
