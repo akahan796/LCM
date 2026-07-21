@@ -396,7 +396,7 @@ function openFilter(){
   armFilterAutoClose(); // if the pointer isn't on the panel, start the dismiss countdown
 }
 let filterAutoCloseTimer=null, pointerOverFilter=false;
-const FILTER_AUTOCLOSE_MS=2500; // comfortable delay before an idle/scrolled-away panel dismisses
+const FILTER_AUTOCLOSE_MS=1200; // snappy delay before an idle/scrolled-away panel dismisses
 function filterIsOpen(){return document.getElementById('filter-modal').classList.contains('open');}
 function armFilterAutoClose(){
   clearTimeout(filterAutoCloseTimer);
@@ -443,7 +443,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenus();closeF
 injectIcons(document);
 updateHeaders();
 render();
-console.log('%cLCM prototype — build 2026-07-21-e (filter auto-close: pointer-off)','color:#0A5DFF;font-weight:bold');
+console.log('%cLCM prototype — build 2026-07-21-f (filter auto-close: 1.2s)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
