@@ -38,6 +38,10 @@
   .btn-copy:hover{color:#141414;}
   .btn-copy svg{width:15px;height:15px;}
   .btn-copy.copied{color:#16794A;}
+  .foot{text-align:center;margin-top:40px;}
+  .signout{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:#6E6E6E;text-decoration:none;padding:8px 14px;border-radius:6px;transition:color .15s ease,background .15s ease;}
+  .signout:hover{color:#141414;background:rgba(20,30,60,.05);}
+  .signout svg{width:16px;height:16px;}
 </style>
 </head>
 <body>
@@ -47,6 +51,12 @@
       <p class="updated">Last updated: <span id="updated">July 21, 2026</span></p>
     </div>
     <div class="tiles" id="tiles"></div>
+    <div class="foot">
+      <a class="signout" href="/api/logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Sign out
+      </a>
+    </div>
   </div>
 <script>
   /* ── Edit these in one place ──────────────────────────────────── */
@@ -56,14 +66,14 @@
       title: 'Figma Prototype',
       tag: 'Prototype',
       desc: 'Working Figma prototype in progress by UX team.',
-      url:  'https://www.figma.com/design/oeJxhTCQpR84bdlm5EKWQy/Lifecycle-Management--LCM--PHASE-1--Dev-Ready-',
+      url:  'https://www.figma.com/design/oeJxhTCQpR84bdlm5EKWQy/Lifecycle-Management--LCM--PHASE-1--Dev-Ready-?node-id=6894-28931',
       icon: 'figma'
     },
     {
       title: 'Design System (Figma)',
       tag: 'Components',
       desc: 'Angular design system (in Figma).',
-      url:  'https://www.figma.com/design/RZiQJLBq89HJJeEYEsVizJ/ODS--Modern-Framework-Component-Library',
+      url:  'https://www.figma.com/design/RZiQJLBq89HJJeEYEsVizJ/ODS--Modern-Framework-Component-Library?node-id=9878-2811',
       icon: 'figma'
     },
     {
