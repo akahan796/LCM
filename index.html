@@ -393,13 +393,14 @@ function openFilter(){
   let left=r.left;
   if(left+cw>window.innerWidth-16) left=window.innerWidth-16-cw;
   card.style.left=Math.max(16,left)+'px';
+  armFilterAutoClose(); // if the pointer isn't on the panel, start the dismiss countdown
 }
 let filterAutoCloseTimer=null, pointerOverFilter=false;
-const FILTER_AUTOCLOSE_MS=2500; // comfortable delay before a scroll-away dismisses the panel
+const FILTER_AUTOCLOSE_MS=2500; // comfortable delay before an idle/scrolled-away panel dismisses
 function filterIsOpen(){return document.getElementById('filter-modal').classList.contains('open');}
 function armFilterAutoClose(){
   clearTimeout(filterAutoCloseTimer);
-  if(pointerOverFilter) return; // actively using the panel — keep it open
+  if(!filterIsOpen() || pointerOverFilter) return; // actively hovering/using the panel — keep it open
   filterAutoCloseTimer=setTimeout(()=>{ if(filterIsOpen()) closeFilter(); }, FILTER_AUTOCLOSE_MS);
 }
 function cancelFilterAutoClose(){clearTimeout(filterAutoCloseTimer); filterAutoCloseTimer=null;}
@@ -419,7 +420,7 @@ document.getElementById('filter-modal').addEventListener('click',e=>{if(e.target
 (function(){
   const card=document.getElementById('filter-card');
   card.addEventListener('mouseenter',()=>{ pointerOverFilter=true; cancelFilterAutoClose(); });
-  card.addEventListener('mouseleave',()=>{ pointerOverFilter=false; });
+  card.addEventListener('mouseleave',()=>{ pointerOverFilter=false; armFilterAutoClose(); });
 })();
 document.getElementById('add-cond').addEventListener('click',()=>{conditions.push({field:'',op:'Contains',value:'',connector:'and'});renderConditions();});
 document.getElementById('clear-filters').addEventListener('click',()=>{conditions=[{field:'',op:'Contains',value:'',connector:'and'}];renderConditions();render();});
