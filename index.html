@@ -155,8 +155,9 @@
   .tile-title .tt{font-size:14px; font-weight:700; line-height:20px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .tile-object{margin-top:6px; font-size:14px; line-height:16px; color:#6E6E6E;}
   .tile-st{display:flex; align-items:center; margin-top:18px;}
-  .st-panel{flex:1 1 0; min-width:0; background:#EEEEEE; border-radius:4px; padding:6px 8px;}
-  .tile.running .st-panel{background:#EEF0FF;}
+  .st-panel{flex:1 1 0; min-width:0; border-radius:4px; padding:6px 8px;}
+  .st-panel.st-source{background:#EEEEEE;}
+  .st-panel.st-target{background:#EEF0FF;}
   .st-chevron{flex:0 0 26px; display:flex; align-items:center; justify-content:center; color:#6E6E6E;}
   .st-chevron .ic{width:10px; height:10px;}
   .st-row + .st-row{margin-top:4px;}
@@ -522,12 +523,12 @@ function tileHtml(t){
     +'<div class="tile-title"><span class="ic" data-ic="docFile"></span><span class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</span></div>'
     +'<div class="tile-object">Object: '+esc(t.object)+'</div>'
     +'<div class="tile-st">'
-      +'<div class="st-panel">'
+      +'<div class="st-panel st-source">'
         +'<div class="st-row"><div class="st-label">Source Env</div><div class="st-value" title="'+esc(t.srcEnv)+'">'+esc(t.srcEnv)+'</div></div>'
         +'<div class="st-row"><div class="st-label">Source App</div><div class="st-value" title="'+esc(t.srcApp)+'">'+esc(t.srcApp)+'</div></div>'
       +'</div>'
       +'<span class="st-chevron"><span class="ic" data-ic="chevR"></span></span>'
-      +'<div class="st-panel">'
+      +'<div class="st-panel st-target">'
         +'<div class="st-row"><div class="st-label">Target Env</div><div class="st-value" title="'+esc(t.tgtEnv)+'">'+esc(t.tgtEnv)+'</div></div>'
         +'<div class="st-row"><div class="st-label">Target App</div><div class="st-value" title="'+esc(t.tgtApp)+'">'+esc(t.tgtApp)+'</div></div>'
       +'</div>'
@@ -554,7 +555,7 @@ document.querySelectorAll('.nav a[data-view]').forEach(a=>{
   a.addEventListener('click',e=>{ e.preventDefault(); showView(a.dataset.view); });
 });
 
-console.log('%cLCM prototype — build 2026-07-21-k (tile panel text 12px, no truncation)','color:#0A5DFF;font-weight:bold');
+console.log('%cLCM prototype — build 2026-07-21-l (tile panels: source gray, target blue)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
