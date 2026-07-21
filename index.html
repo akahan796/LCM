@@ -394,12 +394,29 @@ function openFilter(){
   if(left+cw>window.innerWidth-16) left=window.innerWidth-16-cw;
   card.style.left=Math.max(16,left)+'px';
 }
-function closeFilter(){document.getElementById('filter-modal').classList.remove('open');document.getElementById('filter-btn').classList.remove('open');}
+let filterAutoCloseTimer=null, pointerOverFilter=false;
+const FILTER_AUTOCLOSE_MS=2500; // comfortable delay before a scroll-away dismisses the panel
+function filterIsOpen(){return document.getElementById('filter-modal').classList.contains('open');}
+function armFilterAutoClose(){
+  clearTimeout(filterAutoCloseTimer);
+  if(pointerOverFilter) return; // actively using the panel — keep it open
+  filterAutoCloseTimer=setTimeout(()=>{ if(filterIsOpen()) closeFilter(); }, FILTER_AUTOCLOSE_MS);
+}
+function cancelFilterAutoClose(){clearTimeout(filterAutoCloseTimer); filterAutoCloseTimer=null;}
+function closeFilter(){cancelFilterAutoClose();document.getElementById('filter-modal').classList.remove('open');document.getElementById('filter-btn').classList.remove('open');}
 document.getElementById('filter-btn').addEventListener('click',e=>{
   e.stopPropagation();
   if(document.getElementById('filter-modal').classList.contains('open')){closeFilter();}else{openFilter();}
 });
 document.getElementById('filter-modal').addEventListener('click',e=>{if(e.target.id==='filter-modal')closeFilter();});
+// Auto-close the filter a comfortable few seconds after the user scrolls away from it,
+// unless they are actively hovering/using the panel.
+window.addEventListener('scroll',()=>{ if(filterIsOpen()) armFilterAutoClose(); },{capture:true,passive:true});
+(function(){
+  const card=document.getElementById('filter-card');
+  card.addEventListener('mouseenter',()=>{ pointerOverFilter=true; cancelFilterAutoClose(); });
+  card.addEventListener('mouseleave',()=>{ pointerOverFilter=false; });
+})();
 document.getElementById('add-cond').addEventListener('click',()=>{conditions.push({field:'',op:'Contains',value:'',connector:'and'});renderConditions();});
 document.getElementById('clear-filters').addEventListener('click',()=>{conditions=[{field:'',op:'Contains',value:'',connector:'and'}];renderConditions();render();});
 document.getElementById('conditions').addEventListener('click',e=>{
