@@ -153,15 +153,15 @@
   .tile-title{display:flex; align-items:center; gap:4px; margin-top:12px; color:#141414;}
   .tile-title .ic{width:16px; height:16px; flex:0 0 16px; color:#141414;}
   .tile-title .tt{font-size:14px; font-weight:700; line-height:20px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .tile-object{margin-top:6px; font-size:14px; line-height:20px; color:#6E6E6E;}
+  .tile-object{margin-top:6px; font-size:14px; line-height:16px; color:#6E6E6E;}
   .tile-st{display:flex; align-items:center; margin-top:18px;}
   .st-panel{flex:1 1 0; min-width:0; background:#EEEEEE; border-radius:4px; padding:6px 8px;}
   .tile.running .st-panel{background:#EEF0FF;}
   .st-chevron{flex:0 0 26px; display:flex; align-items:center; justify-content:center; color:#6E6E6E;}
   .st-chevron .ic{width:10px; height:10px;}
-  .st-row + .st-row{margin-top:8px;}
-  .st-label{font-size:12px; color:#6E6E6E; line-height:20px;}
-  .st-value{font-size:12px; font-weight:700; color:#141414; line-height:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .st-row + .st-row{margin-top:4px;}
+  .st-label{font-size:14px; font-weight:500; color:#6E6E6E; line-height:16px;}
+  .st-value{font-size:14px; font-weight:700; color:#141414; line-height:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   @media (max-width:1100px){ .sidebar{display:none;} .search{max-width:none;} }
 </style>
 </head>
@@ -554,7 +554,7 @@ document.querySelectorAll('.nav a[data-view]').forEach(a=>{
   a.addEventListener('click',e=>{ e.preventDefault(); showView(a.dataset.view); });
 });
 
-console.log('%cLCM prototype — build 2026-07-21-i (templates view)','color:#0A5DFF;font-weight:bold');
+console.log('%cLCM prototype — build 2026-07-21-j (tiles matched to reference 392x216)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
