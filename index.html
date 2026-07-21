@@ -410,8 +410,12 @@ document.getElementById('filter-btn').addEventListener('click',e=>{
 });
 document.getElementById('filter-modal').addEventListener('click',e=>{if(e.target.id==='filter-modal')closeFilter();});
 // Auto-close the filter a comfortable few seconds after the user scrolls away from it,
-// unless they are actively hovering/using the panel.
-window.addEventListener('scroll',()=>{ if(filterIsOpen()) armFilterAutoClose(); },{capture:true,passive:true});
+// unless they are actively hovering/using the panel. Listen for the scroll GESTURES
+// (wheel/touch) plus scroll — gestures fire reliably even when a scroll event doesn't
+// propagate to window in this layout.
+['wheel','touchmove','scroll'].forEach(function(ev){
+  window.addEventListener(ev,function(){ if(filterIsOpen()) armFilterAutoClose(); },{capture:true,passive:true});
+});
 (function(){
   const card=document.getElementById('filter-card');
   card.addEventListener('mouseenter',()=>{ pointerOverFilter=true; cancelFilterAutoClose(); });
