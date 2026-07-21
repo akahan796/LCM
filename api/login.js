@@ -31,7 +31,7 @@ export default async function handler(request) {
     return new Response(null, {
       status: 303,
       headers: {
-        'Location': origin + '/',
+        'Location': origin + '/portal.html',
         'Set-Cookie': `lcm_auth=${token}; Path=/; HttpOnly; Secure; SameSite=Lax`,
         'Cache-Control': 'no-store',
       },

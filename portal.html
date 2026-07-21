@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UX Review Portal</title>
+<link rel="icon" href="logo.png" />
+<style>
+  @font-face{font-family:'OneStream Sans';src:url('fonts/OneStreamSans-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
+  @font-face{font-family:'OneStream Sans';src:url('fonts/OneStreamSans-Medium.otf') format('opentype');font-weight:500;font-style:normal;font-display:swap;}
+  @font-face{font-family:'OneStream Sans';src:url('fonts/OneStreamSans-Bold.otf') format('opentype');font-weight:700;font-style:normal;font-display:swap;}
+  *{box-sizing:border-box;}
+  html,body{margin:0;min-height:100%;}
+  body{font-family:'OneStream Sans',Arial,Helvetica,sans-serif;color:#141414;
+    background:radial-gradient(1200px 620px at 50% -10%,#eef2fb 0%,#f4f5f8 55%,#eef0f4 100%);
+    padding:56px 24px 64px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;}
+  .head{text-align:center;margin:0 0 36px;}
+  .head h1{font-size:28px;font-weight:700;letter-spacing:-.01em;margin:0 0 6px;}
+  .head .updated{font-size:14px;font-weight:400;color:#6E6E6E;margin:0;}
+  .tiles{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:stretch;}
+  .tile{display:flex;flex-direction:column;background:#fff;border:1px solid #E6E6E6;border-radius:10px;
+    padding:24px;box-shadow:0 1px 2px rgba(20,30,60,.04);transition:box-shadow .15s ease,border-color .15s ease;}
+  .tile:hover{box-shadow:0 10px 28px rgba(20,30,60,.10);border-color:#Dadada;}
+  .tile-ic{height:30px;margin-bottom:14px;display:flex;align-items:center;}
+  .tile-ic svg{display:block;}
+  .tile h3{font-size:17px;font-weight:700;margin:0 0 10px;line-height:22px;}
+  .tag{align-self:flex-start;font-size:12px;font-weight:600;line-height:16px;padding:3px 9px;border-radius:4px;
+    background:#E8F5EE;color:#16794A;margin:0 0 14px;}
+  .desc{font-size:14px;line-height:20px;color:#5A5A5A;margin:0 0 20px;flex:1 1 auto;}
+  .btn-open{display:flex;align-items:center;justify-content:center;gap:7px;height:40px;border-radius:4px;
+    background:#0A5DFF;color:#fff;font-size:14px;font-weight:700;text-decoration:none;
+    font-family:inherit;cursor:pointer;transition:background .15s ease;}
+  .btn-open:hover{background:#0847c9;}
+  .btn-open svg{width:15px;height:15px;}
+  .btn-copy{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;
+    height:30px;border:0;background:none;color:#6E6E6E;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;}
+  .btn-copy:hover{color:#141414;}
+  .btn-copy svg{width:15px;height:15px;}
+  .btn-copy.copied{color:#16794A;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <h1>UX Review Portal</h1>
+      <p class="updated">Last updated: <span id="updated">July 21, 2026</span></p>
+    </div>
+    <div class="tiles" id="tiles"></div>
+  </div>
+<script>
+  /* ── Edit these in one place ──────────────────────────────────── */
+  var LAST_UPDATED = 'July 21, 2026'; // date the HTML prototype was last updated
+  var TILES = [
+    {
+      title: 'Figma Prototype',
+      tag: 'Prototype',
+      desc: 'Working Figma prototype in progress by UX team.',
+      url:  'https://www.figma.com/design/oeJxhTCQpR84bdlm5EKWQy/Lifecycle-Management--LCM--PHASE-1--Dev-Ready-',
+      icon: 'figma'
+    },
+    {
+      title: 'Design System (Figma)',
+      tag: 'Components',
+      desc: 'Angular design system (in Figma).',
+      url:  'https://www.figma.com/design/RZiQJLBq89HJJeEYEsVizJ/ODS--Modern-Framework-Component-Library',
+      icon: 'figma'
+    },
+    {
+      title: 'HTML prototype',
+      tag: 'Live',
+      desc: 'Latest HTML prototype.',
+      url:  location.origin + '/',
+      icon: 'html'
+    }
+  ];
+  /* ─────────────────────────────────────────────────────────────── */
+
+  var ICONS = {
+    figma: '<svg viewBox="0 0 38 57" width="27" height="27" xmlns="http://www.w3.org/2000/svg"><path fill="#0acf83" d="M9.5 57c5.25 0 9.5-4.25 9.5-9.5V38H9.5a9.5 9.5 0 0 0 0 19z"/><path fill="#a259ff" d="M0 28.5A9.5 9.5 0 0 1 9.5 19H19v19H9.5A9.5 9.5 0 0 1 0 28.5z"/><path fill="#f24e1e" d="M0 9.5A9.5 9.5 0 0 1 9.5 0H19v19H9.5A9.5 9.5 0 0 1 0 9.5z"/><path fill="#ff7262" d="M19 0h9.5a9.5 9.5 0 0 1 0 19H19V0z"/><path fill="#1abcfe" d="M38 28.5A9.5 9.5 0 1 1 19 28.5 9.5 9.5 0 0 1 38 28.5z"/></svg>',
+    html:  '<svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="#0A5DFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M2.5 8h19"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>'
+  };
+  var OPEN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>';
+  var COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+  var CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+  document.getElementById('updated').textContent = LAST_UPDATED;
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  var host = document.getElementById('tiles');
+  TILES.forEach(function(t){
+    var el = document.createElement('div');
+    el.className = 'tile';
+    el.innerHTML =
+      '<div class="tile-ic">' + (ICONS[t.icon] || '') + '</div>' +
+      '<h3>' + esc(t.title) + '</h3>' +
+      '<span class="tag">' + esc(t.tag) + '</span>' +
+      '<p class="desc">' + esc(t.desc) + '</p>' +
+      '<a class="btn-open" href="' + esc(t.url) + '" target="_blank" rel="noopener noreferrer">Open' + OPEN_ICON + '</a>' +
+      '<button class="btn-copy" type="button" data-url="' + esc(t.url) + '">' + COPY_ICON + '<span>Copy link</span></button>';
+    host.appendChild(el);
+  });
+
+  host.addEventListener('click', function(e){
+    var btn = e.target.closest('.btn-copy');
+    if (!btn) return;
+    var url = btn.getAttribute('data-url');
+    var label = btn.querySelector('span');
+    function done(){
+      btn.classList.add('copied');
+      btn.querySelector('svg').outerHTML = CHECK_ICON;
+      label.textContent = 'Copied!';
+      setTimeout(function(){
+        btn.classList.remove('copied');
+        btn.querySelector('svg').outerHTML = COPY_ICON;
+        label.textContent = 'Copy link';
+      }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done).catch(fallback);
+    } else { fallback(); }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = url; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch(_){}
+      document.body.removeChild(ta); done();
+    }
+  });
+</script>
+</body>
+</html>
