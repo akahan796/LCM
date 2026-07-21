@@ -7,7 +7,7 @@
 // is a server-only secret, so this is enforced on the server — not in the browser.
 
 export const config = {
-  matcher: ['/((?!api/|login\\.html|fonts/|logo\\.png|favicon\\.ico|robots\\.txt).*)'],
+  matcher: ['/((?!api/|login\\.html|fonts/|logo\\.png|brandmark\\.svg|favicon\\.ico|robots\\.txt).*)'],
 };
 
 export default function middleware(request) {
