@@ -124,6 +124,10 @@
   .connector{margin-bottom:8px;}
   .remove-btn{background:none; border:0; cursor:pointer; color:#D0021B; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; padding:0; margin-left:2px;}
   .add-cond{margin-top:4px;}
+  .fc-footer{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px;}
+  .fc-footer .add-cond{margin-top:0;}
+  .apply-btn:disabled{opacity:.45; cursor:default;}
+  .apply-btn:disabled:hover{background:var(--brand);}
   .dd{position:relative;}
   .dd-control{display:flex; align-items:center; justify-content:space-between; gap:8px; height:28px; padding:0 10px; background:#fff; border:1px solid var(--line); border-radius:4px; cursor:pointer; font-size:14px; color:var(--text); user-select:none;}
   .dd-control > span:first-child{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
@@ -274,7 +278,10 @@
     </div>
     <div class="fc-sub">Filter by</div>
     <div id="conditions"></div>
-    <button class="btn sm primary add-cond" id="add-cond"><span class="ic" data-ic="plus"></span>Add Condition</button>
+    <div class="fc-footer">
+      <button class="btn sm primary add-cond" id="add-cond"><span class="ic" data-ic="plus"></span>Add Condition</button>
+      <button class="btn sm primary apply-btn" id="apply-filter" disabled>Apply</button>
+    </div>
   </div>
 </div>
 
@@ -384,13 +391,14 @@ document.getElementById('chk-all').addEventListener('change', e=>{ document.quer
 /* ---- Filter builder (ODS Standard Card) ---- */
 const FIELDS=[{key:'id',label:'ID'},{key:'type',label:'Type'},{key:'template',label:'Template'},{key:'object',label:'Object'},{key:'user',label:'User'},{key:'start',label:'Start'},{key:'statusText',label:'Status'}];
 const OPERATORS=['Contains','Does not contain','Equals'];
-let conditions=[{field:'',op:'Contains',value:'',connector:'and'}];
+let conditions=[{field:'',op:'Contains',value:'',connector:'and'}]; // builder working state
+let appliedConditions=[]; // committed on Apply — the grid filters by THIS, not the live builder
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function fieldLabel(k){const f=FIELDS.find(f=>f.key===k);return f?f.label:'';}
 function fieldKey(l){const f=FIELDS.find(f=>f.label===l);return f?f.key:'';}
 function distinctValues(k){if(!k)return [];return [...new Set(DATA.map(d=>String(d[k])))].sort();}
 function matchConditions(d){
-  const act=conditions.filter(c=>c.field&&c.value);
+  const act=appliedConditions.filter(c=>c.field&&c.value);
   if(!act.length) return true;
   let res=null;
   act.forEach(c=>{
@@ -422,8 +430,10 @@ function renderConditions(){
   cont.innerHTML=html; injectIcons(cont);
   cont.classList.toggle('scroll', conditions.length>3); // fixed height + scroll past 3 filters
   refreshClearBtn();
+  refreshApplyBtn();
 }
 function hasActiveFilters(){return conditions.some(c=>c.field&&c.value);}
+function refreshApplyBtn(){ document.getElementById('apply-filter').disabled = !hasActiveFilters(); }
 function refreshClearBtn(){
   // "Clear all filters" only when a filter is actually set; otherwise "Close".
   const b=document.getElementById('clear-filters');
@@ -433,7 +443,7 @@ function refreshClearBtn(){
 }
 function closeMenus(){document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));}
 function updateFilterCount(){
-  const n=conditions.filter(c=>c.field&&c.value).length;
+  const n=appliedConditions.filter(c=>c.field&&c.value).length;
   const b=document.getElementById('filter-count');
   if(n>0){b.textContent=n;b.style.display='';}else{b.style.display='none';}
 }
@@ -483,13 +493,23 @@ document.getElementById('filter-modal').addEventListener('click',e=>{if(e.target
   });
 })();
 document.getElementById('add-cond').addEventListener('click',()=>{conditions.push({field:'',op:'Contains',value:'',connector:'and'});renderConditions();});
+// Apply — commit the built filters to the grid, then dismiss. Disabled until >=1 filter set.
+document.getElementById('apply-filter').addEventListener('click',()=>{
+  if(!hasActiveFilters()) return;
+  appliedConditions=conditions.map(c=>({...c})); // commit the working state
+  render();      // refresh the grid now (and the count badge)
+  closeFilter(); // modal goes away
+});
 document.getElementById('clear-filters').addEventListener('click',()=>{
-  if(hasActiveFilters()){conditions=[{field:'',op:'Contains',value:'',connector:'and'}];renderConditions();render();updateFilterCount();}
+  // Clear is an explicit reset: empty the builder AND the applied filter, refresh grid.
+  if(hasActiveFilters()){conditions=[{field:'',op:'Contains',value:'',connector:'and'}];appliedConditions=[];renderConditions();render();}
   else{closeFilter();}
 });
 document.getElementById('conditions').addEventListener('click',e=>{
+  // NOTE: editing conditions updates the builder only — the grid is NOT refreshed
+  // until Apply is clicked.
   const rm=e.target.closest('.remove-btn');
-  if(rm){conditions.splice(+rm.dataset.remove,1);renderConditions();render();return;}
+  if(rm){conditions.splice(+rm.dataset.remove,1);renderConditions();return;}
   const ctrl=e.target.closest('.dd-control');
   if(ctrl){const d=ctrl.parentElement,open=d.classList.contains('open');closeMenus();if(!open)d.classList.add('open');e.stopPropagation();return;}
   const item=e.target.closest('.dd-item');
@@ -498,7 +518,7 @@ document.getElementById('conditions').addEventListener('click',e=>{
     else if(type==='op')conditions[i].op=val;
     else if(type==='value')conditions[i].value=val;
     else if(type==='conn')conditions[i].connector=val;
-    closeMenus();renderConditions();render();}
+    closeMenus();renderConditions();}
 });
 document.addEventListener('click',closeMenus);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenus();closeFilter();}});
@@ -561,7 +581,7 @@ document.querySelectorAll('.nav a[data-view]').forEach(a=>{
   a.addEventListener('click',e=>{ e.preventDefault(); showView(a.dataset.view); });
 });
 
-console.log('%cLCM prototype — build 2026-07-21-n (filter: fixed height + scroll, hover button retains)','color:#0A5DFF;font-weight:bold');
+console.log('%cLCM prototype — build 2026-07-22-p (filter: Apply button, commit-on-apply)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
