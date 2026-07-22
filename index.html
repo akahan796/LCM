@@ -121,7 +121,7 @@
   /* When more than 3 conditions exist, cap the height and scroll the parameters area. */
   #conditions.scroll{max-height:180px; overflow-y:auto; overflow-x:hidden; padding-right:6px;}
   .cond{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
-  .connector{display:flex; justify-content:center; margin-bottom:8px;} /* connector sits in the gap between conditions */
+  .connector{margin-bottom:8px;}
   .remove-btn{background:none; border:0; cursor:pointer; color:#D0021B; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; padding:0; margin-left:2px;}
   .add-cond{margin-top:4px;}
   .dd{position:relative;}
@@ -384,32 +384,21 @@ document.getElementById('chk-all').addEventListener('change', e=>{ document.quer
 /* ---- Filter builder (ODS Standard Card) ---- */
 const FIELDS=[{key:'id',label:'ID'},{key:'type',label:'Type'},{key:'template',label:'Template'},{key:'object',label:'Object'},{key:'user',label:'User'},{key:'start',label:'Start'},{key:'statusText',label:'Status'}];
 const OPERATORS=['Contains','Does not contain','Equals'];
-// A filter is a flat list of condition NODES with an independently-editable
-// connector ('and'/'or') in the GAP between each pair — connectors[i] joins
-// conditions[i] and conditions[i+1]. Each node carries a `type` so nested groups
-// ({type:'group', op, children:[...]}) can be introduced later without a redesign.
-let conditions=[{type:'condition',field:'',op:'Contains',value:''}];
-let connectors=[]; // length === conditions.length - 1
-function syncConnectors(){
-  while(connectors.length < conditions.length-1) connectors.push('and');
-  if(connectors.length > conditions.length-1) connectors.length = Math.max(0, conditions.length-1);
-}
+let conditions=[{field:'',op:'Contains',value:'',connector:'and'}];
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function fieldLabel(k){const f=FIELDS.find(f=>f.key===k);return f?f.label:'';}
 function fieldKey(l){const f=FIELDS.find(f=>f.label===l);return f?f.key:'';}
 function distinctValues(k){if(!k)return [];return [...new Set(DATA.map(d=>String(d[k])))].sort();}
 function matchConditions(d){
-  // Sequential fold: each connector defines how the condition below relates to
-  // the result above it (left-to-right, no precedence — grouping is future work).
+  const act=conditions.filter(c=>c.field&&c.value);
+  if(!act.length) return true;
   let res=null;
-  conditions.forEach((c,i)=>{
-    if(c.type!=='condition' || !c.field || !c.value) return; // skip incomplete rows
+  act.forEach(c=>{
     const v=String(d[c.field]).toLowerCase(), cv=c.value.toLowerCase();
     const m = c.op==='Contains'? v.includes(cv) : c.op==='Does not contain'? !v.includes(cv) : v===cv;
-    if(res===null){ res=m; }                                 // first active condition
-    else { const conn=connectors[i-1]||'and'; res = conn==='or' ? (res||m) : (res&&m); }
+    res = res===null? m : (c.connector==='or'? (res||m) : (res&&m));
   });
-  return res===null? true : res;
+  return res;
 }
 function dd(type,i,value,placeholder,head,options){
   const ph=!value;
@@ -418,30 +407,23 @@ function dd(type,i,value,placeholder,head,options){
   return '<div class="dd dd-'+type+'" data-cond="'+i+'" data-type="'+type+'">'+
     '<div class="dd-control'+(ph?' placeholder':'')+'"><span>'+esc(value||placeholder)+'</span><span class="ic" data-ic="chevron"></span></div>'+menu+'</div>';
 }
-function conditionHtml(c,i){
-  // Future: if (c.type==='group') return groupHtml(c,i);
-  return '<div class="cond">'+
-    dd('field',i,fieldLabel(c.field),'Select Field Name','FIELD NAME',FIELDS.map(f=>f.label))+
-    dd('op',i,c.op,'Contains','OPERATORS',OPERATORS)+
-    dd('value',i,c.value,'Select Value','VALUE',distinctValues(c.field))+
-    (conditions.length>1?'<button class="remove-btn" data-remove="'+i+'"><span class="ic" data-ic="remove"></span></button>':'')+
-    '</div>';
-}
 function renderConditions(){
-  syncConnectors();
   let html='';
   conditions.forEach((c,i)=>{
-    // Connector lives in the gap ABOVE this node (none above the first). data-cond
-    // on a 'conn' dropdown is the CONNECTOR index (i-1), independently editable.
-    if(i>0) html+='<div class="connector">'+dd('conn',i-1,connectors[i-1]||'and','and','',['and','or'])+'</div>';
-    html+=conditionHtml(c,i);
+    if(i>0) html+='<div class="connector">'+dd('conn',i,c.connector,'and','',['and','or'])+'</div>';
+    html+='<div class="cond">'+
+      dd('field',i,fieldLabel(c.field),'Select Field Name','FIELD NAME',FIELDS.map(f=>f.label))+
+      dd('op',i,c.op,'Contains','OPERATORS',OPERATORS)+
+      dd('value',i,c.value,'Select Value','VALUE',distinctValues(c.field))+
+      (conditions.length>1?'<button class="remove-btn" data-remove="'+i+'"><span class="ic" data-ic="remove"></span></button>':'')+
+      '</div>';
   });
   const cont=document.getElementById('conditions');
   cont.innerHTML=html; injectIcons(cont);
   cont.classList.toggle('scroll', conditions.length>3); // fixed height + scroll past 3 filters
   refreshClearBtn();
 }
-function hasActiveFilters(){return conditions.some(c=>c.type==='condition'&&c.field&&c.value);}
+function hasActiveFilters(){return conditions.some(c=>c.field&&c.value);}
 function refreshClearBtn(){
   // "Clear all filters" only when a filter is actually set; otherwise "Close".
   const b=document.getElementById('clear-filters');
@@ -451,7 +433,7 @@ function refreshClearBtn(){
 }
 function closeMenus(){document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));}
 function updateFilterCount(){
-  const n=conditions.filter(c=>c.type==='condition'&&c.field&&c.value).length;
+  const n=conditions.filter(c=>c.field&&c.value).length;
   const b=document.getElementById('filter-count');
   if(n>0){b.textContent=n;b.style.display='';}else{b.style.display='none';}
 }
@@ -500,18 +482,14 @@ document.getElementById('filter-modal').addEventListener('click',e=>{if(e.target
     el.addEventListener('mouseleave',()=>{ pointerOverFilter=false; armFilterAutoClose(); });
   });
 })();
-document.getElementById('add-cond').addEventListener('click',()=>{
-  conditions.push({type:'condition',field:'',op:'Contains',value:''});
-  if(conditions.length>1) connectors.push('and'); // default connector for the new gap
-  renderConditions();
-});
+document.getElementById('add-cond').addEventListener('click',()=>{conditions.push({field:'',op:'Contains',value:'',connector:'and'});renderConditions();});
 document.getElementById('clear-filters').addEventListener('click',()=>{
-  if(hasActiveFilters()){conditions=[{type:'condition',field:'',op:'Contains',value:''}];connectors=[];renderConditions();render();updateFilterCount();}
+  if(hasActiveFilters()){conditions=[{field:'',op:'Contains',value:'',connector:'and'}];renderConditions();render();updateFilterCount();}
   else{closeFilter();}
 });
 document.getElementById('conditions').addEventListener('click',e=>{
   const rm=e.target.closest('.remove-btn');
-  if(rm){const i=+rm.dataset.remove; conditions.splice(i,1); if(connectors.length) connectors.splice(i>0?i-1:0,1); renderConditions();render();return;}
+  if(rm){conditions.splice(+rm.dataset.remove,1);renderConditions();render();return;}
   const ctrl=e.target.closest('.dd-control');
   if(ctrl){const d=ctrl.parentElement,open=d.classList.contains('open');closeMenus();if(!open)d.classList.add('open');e.stopPropagation();return;}
   const item=e.target.closest('.dd-item');
@@ -519,7 +497,7 @@ document.getElementById('conditions').addEventListener('click',e=>{
     if(type==='field'){conditions[i].field=fieldKey(val);conditions[i].value='';}
     else if(type==='op')conditions[i].op=val;
     else if(type==='value')conditions[i].value=val;
-    else if(type==='conn')connectors[i]=val; // i here is the CONNECTOR index (gap)
+    else if(type==='conn')conditions[i].connector=val;
     closeMenus();renderConditions();render();}
 });
 document.addEventListener('click',closeMenus);
@@ -583,7 +561,7 @@ document.querySelectorAll('.nav a[data-view]').forEach(a=>{
   a.addEventListener('click',e=>{ e.preventDefault(); showView(a.dataset.view); });
 });
 
-console.log('%cLCM prototype — build 2026-07-21-o (filter: independent AND/OR connectors between conditions)','color:#0A5DFF;font-weight:bold');
+console.log('%cLCM prototype — build 2026-07-21-n (filter: fixed height + scroll, hover button retains)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
