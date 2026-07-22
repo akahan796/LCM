@@ -39,6 +39,8 @@
   .dsb-cat{font-size:12px;color:var(--muted);padding:16px 12px 6px;white-space:nowrap;}
   .dsb-note{font-size:13px;line-height:18px;color:var(--note);padding:4px 12px 10px;}
   .dsb-note b{color:var(--ink-strong);font-weight:600;}
+  .dsb-empty{font-size:13px;color:var(--muted);padding:6px 12px 8px;}
+  .dsb-notes-area{padding:2px 4px 4px;}
   .dsb-info{font-size:12.5px;line-height:22px;color:var(--note);padding:2px 12px 4px;}
   .dsb-info .row{display:flex;gap:8px;}
   .dsb-info .k{color:var(--muted);flex:0 0 92px;}
@@ -51,6 +53,8 @@
   .dsb.collapsed .dsb-item .badge,
   .dsb.collapsed .dsb-cat,
   .dsb.collapsed .dsb-note,
+  .dsb.collapsed .dsb-empty,
+  .dsb.collapsed .dsb-notes-area,
   .dsb.collapsed .dsb-info,
   .dsb.collapsed .dsb-foot span{display:none;}
   .dsb.collapsed .dsb-item{justify-content:center;padding:0;gap:0;}
@@ -77,24 +81,18 @@
       <div class="dsb-cat">Screens</div>
       <button class="dsb-item nav active" data-view="activity"><span class="ic" data-ic="activity"></span><span class="lbl">Activity Log</span></button>
       <button class="dsb-item nav" data-view="templates"><span class="ic" data-ic="templates"></span><span class="lbl">Templates</span></button>
-
-      <div class="dsb-cat">Designer notes</div>
-      <div class="dsb-note"><b>Filter builder:</b> field locks after the first selection; value is a multi-select (checkboxes). Apply commits to the grid.</div>
-      <div class="dsb-note"><b>Templates:</b> tiles use the ODS “Standard Card” (392×216); Source panel grey, Target panel blue.</div>
-      <div class="dsb-note" style="color:var(--muted)">Leave feedback in this review, or drop comments here for the next iteration.</div>
+      <button class="dsb-item" id="ux-notes"><span class="ic" data-ic="note"></span><span class="lbl">UX Notes</span></button>
+      <div class="dsb-notes-area" id="ux-notes-area" hidden><div class="dsb-empty">No notes yet.</div></div>
 
       <div class="dsb-cat">Information</div>
       <div class="dsb-info">
         <div class="row"><span class="k">Codebase</span><span>build-less React</span></div>
         <div class="row"><span class="k">Design</span><span>OneStream ODS</span></div>
         <div class="row"><span class="k">Updated</span><span id="updated">—</span></div>
-        <div class="row"><span class="k">Access</span><span>Password-gated</span></div>
       </div>
 
       <div class="dsb-cat">Downloads &amp; links</div>
-      <a class="dsb-item" href="https://www.figma.com/design/oeJxhTCQpR84bdlm5EKWQy/Lifecycle-Management--LCM--PHASE-1--Dev-Ready-?node-id=6894-28931" target="_blank" rel="noopener"><span class="ic" data-ic="link"></span><span class="lbl">Figma prototype</span></a>
-      <a class="dsb-item" href="https://www.figma.com/design/RZiQJLBq89HJJeEYEsVizJ/ODS--Modern-Framework-Component-Library?node-id=9878-2811" target="_blank" rel="noopener"><span class="ic" data-ic="link"></span><span class="lbl">Design system (Figma)</span></a>
-      <a class="dsb-item" href="https://github.com/akahan796/LCM" target="_blank" rel="noopener"><span class="ic" data-ic="download"></span><span class="lbl">Source code (GitHub)</span></a>
+      <div class="dsb-empty">No files shared.</div>
     </div>
 
     <div class="dsb-foot"><span class="ic" data-ic="info" style="display:inline-flex"></span><span>Preview frame · not part of the prototype</span></div>
@@ -113,6 +111,7 @@
     external:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>',
     activity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
     templates:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/></svg>',
+    note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 12h5"/></svg>',
     info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
     download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 4 5-4M5 21h14"/></svg>',
     link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>',
@@ -132,6 +131,14 @@
   }
   setCollapsed((()=>{ try{ return localStorage.getItem('lcm_dsb_collapsed')==='1'; }catch(_){ return false; } })());
   collapseBtn.addEventListener('click', ()=> setCollapsed(!dsb.classList.contains('collapsed')));
+
+  // UX Notes — toggle an (empty) notes area
+  const uxNotes = document.getElementById('ux-notes'), uxArea = document.getElementById('ux-notes-area');
+  uxNotes.addEventListener('click', ()=>{
+    const show = uxArea.hidden;
+    uxArea.hidden = !show;
+    uxNotes.classList.toggle('active', show);
+  });
 
   // Screen navigation — drive the framed prototype via postMessage
   const proto = document.getElementById('proto');
