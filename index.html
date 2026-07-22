@@ -176,121 +176,20 @@
 </style>
 </head>
 <body>
-<div class="app">
-  <aside class="sidebar">
-    <div class="side-head"><span class="ic i16" data-ic="collapse"></span></div>
-    <div class="brand">
-      <div class="logo"><img src="logo.png" alt="Kopi-O" width="82" height="82" /></div>
-      <div class="name">Kopi-O</div>
-    </div>
-    <nav class="nav">
-      <a href="#"><span class="ic i16" data-ic="navHome"></span>Home</a>
-      <div class="cat">MIGRATIONS</div>
-      <a href="#"><span class="ic i16" data-ic="navOpen"></span>Open<span class="ic chev" data-ic="chevron"></span></a>
-      <a href="#"><span class="ic i16" data-ic="navClosed"></span>Closed<span class="ic chev" data-ic="chevron"></span></a>
-      <div class="cat">ACTIVITY</div>
-      <a href="#" class="active" data-view="activity"><span class="ic i16" data-ic="navActivity"></span>Activity Log</a>
-      <div class="cat">TEMPLATE MANAGEMENT</div>
-      <a href="#" data-view="templates"><span class="ic i16" data-ic="navTemplates"></span>Templates</a>
-    </nav>
-    <div class="foot">
-      <span class="os"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M7 15l10-6"/></svg>onestream</span>
-      <span class="ver">Version 0.1</span>
-    </div>
-  </aside>
+<div id="root"></div>
+<script type="module">
+import React from 'https://esm.sh/react@18.3.1';
+import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1';
+import { createPortal } from 'https://esm.sh/react-dom@18.3.1?deps=react@18.3.1';
+import htm from 'https://esm.sh/htm@3.1.1';
+const { useState, useEffect, useRef, useMemo, useCallback, Fragment } = React;
+// Bind htm to createElement, mapping `class`->`className` so the existing CSS keeps working.
+function h(type, props, ...children){
+  if(props && 'class' in props){ props.className = props.class; delete props.class; }
+  return React.createElement(type, props, ...children);
+}
+const html = htm.bind(h);
 
-  <div class="main">
-    <header class="topbar">
-      <div class="title">Lifecycle Management (Product Mockup)</div>
-      <div class="search">
-        <span class="ic i16" data-ic="search"></span>
-        <input placeholder="Search user, environment, application, dimension…" />
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button class="btn primary"><span class="ic" data-ic="plus"></span>Create</button>
-        <button class="btn"><span class="ic" data-ic="ai"></span>Ask</button>
-        <button class="btn"><span class="ic" data-ic="bulb"></span>Intent</button>
-        <div class="avatar"><span class="ic i22"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="9" r="3.4"/><path d="M5.5 20c0-3.6 3-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/></svg></span></div>
-      </div>
-    </header>
-
-    <main class="content-view">
-    <section class="view" id="view-activity">
-      <h1 class="cv-heading">Activity Log</h1>
-      <p class="cv-body">View all closed migrations, individual activity, and member-level details. Sort and reorder columns, search, filter, and export content.</p>
-      <div class="content-actions">
-        <div class="ca-left">
-          <div class="field">
-            <span class="ic" data-ic="search"></span>
-            <input id="search" placeholder="Search activity" />
-          </div>
-          <button class="btn sm" id="filter-btn"><span class="ic" data-ic="filter"></span>Filter<span class="filter-count" id="filter-count" style="display:none">0</span><span class="ic filter-chev" data-ic="chevron"></span></button>
-        </div>
-        <div class="ca-right">
-          <button class="btn sm primary"><span class="ic" data-ic="export"></span>Export Member Details</button>
-          <button class="iconbtn dark"><span class="ic" data-ic="grid"></span></button>
-          <button class="iconbtn"><span class="ic" data-ic="list"></span></button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr id="head-row">
-              <th class="col-chk"><input type="checkbox" id="chk-all" /></th>
-              <th class="sortable" data-key="id"><span class="th">ID <span class="dir"></span><span class="ic" data-ic="filter"></span></span></th>
-              <th class="sortable" data-key="type"><span class="th">Type <span class="dir"></span><span class="ic" data-ic="filter"></span></span></th>
-              <th class="sortable" data-key="template"><span class="th">Template <span class="dir"></span><span class="ic" data-ic="filter"></span></span></th>
-              <th class="sortable" data-key="object"><span class="th">Object <span class="dir"></span><span class="ic" data-ic="filter"></span></span></th>
-              <th class="sortable" data-key="user"><span class="th">User <span class="dir"></span><span class="ic" data-ic="filter"></span></span></th>
-              <th class="sortable active" data-key="start"><span class="th">Start <span class="dir"></span><span class="ic" data-ic="filter"></span></span></th>
-              <th class="sortable" data-key="statusText"><span class="th">Status <span class="dir"></span><span class="ic" data-ic="filter"></span></span></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="view" id="view-templates" hidden>
-      <h1 class="cv-heading">Templates</h1>
-      <p class="cv-body">Create and manage templates and template sets. Templates define individual, reusable migration configurations, while template sets group related templates for sequential use.</p>
-      <div class="content-actions">
-        <div class="ca-left">
-          <div class="field"><span class="ic" data-ic="search"></span><input id="tpl-search" placeholder="Search templates" /></div>
-          <button class="btn sm"><span class="ic" data-ic="filter"></span>Filter</button>
-        </div>
-        <div class="ca-right">
-          <button class="btn sm primary"><span class="ic" data-ic="plus"></span>Create Template</button>
-          <button class="iconbtn dark"><span class="ic" data-ic="grid"></span></button>
-          <button class="iconbtn"><span class="ic" data-ic="list"></span></button>
-        </div>
-      </div>
-      <div class="tiles-grid" id="tiles-grid"></div>
-    </section>
-    </main>
-  </div>
-</div>
-
-<div class="modal-backdrop" id="filter-modal">
-  <div class="filter-card" id="filter-card">
-    <div class="fc-head">
-      <span class="title">Filter by</span>
-      <button class="clear" id="close-filter">Close</button>
-    </div>
-    <div id="conditions"></div>
-    <div class="fc-footer">
-      <div class="fc-footer-left">
-        <button class="btn sm add-cond" id="add-cond"><span class="ic" data-ic="plus"></span>Add Condition</button>
-        <button class="fc-link" id="clear-all">Clear All</button>
-      </div>
-      <button class="btn sm primary apply-btn" id="apply-filter" disabled>Apply</button>
-    </div>
-  </div>
-</div>
-
-<script>
 const ICONS = {
   search:'<svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.12041 1C3.7402 1 1 3.7402 1 7.12041C1 10.5006 3.7402 13.2408 7.12041 13.2408C8.50595 13.2408 9.78442 12.7802 10.8103 12.0039L13.8064 15L15 13.8064L12.0039 10.8103C12.7802 9.78442 13.2408 8.50595 13.2408 7.12041C13.2408 3.7402 10.5006 1 7.12041 1ZM2.68794 7.12041C2.68794 4.67243 4.67243 2.68794 7.12041 2.68794C9.5684 2.68794 11.5529 4.67243 11.5529 7.12041C11.5529 9.5684 9.5684 11.5529 7.12041 11.5529C4.67243 11.5529 2.68794 9.5684 2.68794 7.12041Z"/></svg>',
   filter:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.4612 12.6966V11.0324H9.60545V12.6966H6.4612ZM3.50124 8.83208V7.16791H12.561V8.83208H3.50124ZM1.28333 4.9676V3.30344H14.7833V4.9676H1.28333Z"/></svg>',
@@ -334,197 +233,8 @@ const DATA = [
 ];
 DATA.forEach(d=>{ d.statusText = d.status.map(s=>s[0]).join(" "); d._sort = Date.parse(d.start.replace(",","")) || 0; });
 
-let sortKey = "start", sortDir = -1;
-const ARROW_DOWN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 12l6 6 6-6"/></svg>';
-const ARROW_UP = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 12l6-6 6 6"/></svg>';
-const ACT='<svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.625 1H5.375V2.69697H2.75V15H13.25V2.69697H10.625V1ZM6.95 3.9697V2.69697H9.05V3.9697H6.95ZM4.5 13.303V4.5H5.375V5.66667H10.625V4.5H11.5V13.303H4.5Z"/></svg>';
-const MEM=ICONS.userCircle;
-const WARN='<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l6.5 12h-13z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M7.4 6h1.2v3.4H7.4zM7.4 10.6h1.2v1.2H7.4z"/></svg>';
-
-function badgeHtml(status){
-  return '<div class="badges">'+status.map(([t,c])=>{
-    const warn = c==="warning" ? '<span class="ic" style="width:12px">'+WARN+'</span>' : '';
-    return '<span class="badge '+c+'">'+warn+t+'</span>';
-  }).join('')+'</div>';
-}
-function render(){
-  updateFilterCount();
-  const q = (document.getElementById('search').value||'').toLowerCase();
-  let rows = DATA.filter(d=> (!q || [d.id,d.type,d.template,d.object,d.user,d.start,d.statusText].join(' ').toLowerCase().includes(q)) && matchConditions(d));
-  rows.sort((a,b)=>{
-    let av = sortKey==="start"? a._sort : (sortKey==="id"? a.id : String(a[sortKey]).toLowerCase());
-    let bv = sortKey==="start"? b._sort : (sortKey==="id"? b.id : String(b[sortKey]).toLowerCase());
-    return av<bv? -sortDir : av>bv? sortDir : 0;
-  });
-  const tb = document.getElementById('rows');
-  if(!rows.length){ tb.innerHTML = '<tr><td colspan="9" class="empty">No matching activity.</td></tr>'; return; }
-  tb.innerHTML = rows.map(d=>`
-    <tr>
-      <td class="col-chk"><input type="checkbox" class="row-chk"/></td>
-      <td class="id"><a href="#">${d.id}</a></td>
-      <td>${d.type}</td>
-      <td class="tmpl" title="${d.template}">${d.template}</td>
-      <td>${d.object}</td>
-      <td>${d.user}</td>
-      <td>${d.start}</td>
-      <td>${badgeHtml(d.status)}</td>
-      <td><div class="row-actions">
-        <button class="btn sm"><span class="ic">${ACT}</span>Activity</button>
-        <button class="btn sm"><span class="ic">${MEM}</span>Members</button>
-      </div></td>
-    </tr>`).join('');
-  injectIcons(tb);
-}
-function injectIcons(root){ (root||document).querySelectorAll('.ic[data-ic]').forEach(el=>{ if(!el.firstChild) el.innerHTML = ICONS[el.dataset.ic]||''; }); }
-function updateHeaders(){
-  document.querySelectorAll('th.sortable').forEach(th=>{
-    const active = th.dataset.key===sortKey;
-    th.classList.toggle('active', active);
-    th.querySelector('.dir').innerHTML = active ? (sortDir===1?ARROW_UP:ARROW_DOWN) : '';
-  });
-}
-document.querySelectorAll('th.sortable').forEach(th=>{
-  th.addEventListener('click', ()=>{
-    const k = th.dataset.key;
-    if(sortKey===k){ sortDir *= -1; } else { sortKey = k; sortDir = 1; }
-    updateHeaders(); render();
-  });
-});
-document.getElementById('search').addEventListener('input', render);
-document.getElementById('chk-all').addEventListener('change', e=>{ document.querySelectorAll('.row-chk').forEach(c=>c.checked = e.target.checked); });
-
-/* ---- Filter builder (ODS Standard Card) ---- */
 const FIELDS=[{key:'id',label:'ID'},{key:'type',label:'Type'},{key:'template',label:'Template'},{key:'object',label:'Object'},{key:'user',label:'User'},{key:'start',label:'Start'},{key:'statusText',label:'Status'}];
 const OPERATORS=['Contains','Does not contain','Equals'];
-let conditions=[{field:'',op:'Contains',value:'',connector:'and'}]; // builder working state
-let appliedConditions=[]; // committed on Apply — the grid filters by THIS, not the live builder
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
-function fieldLabel(k){const f=FIELDS.find(f=>f.key===k);return f?f.label:'';}
-function fieldKey(l){const f=FIELDS.find(f=>f.label===l);return f?f.key:'';}
-function distinctValues(k){if(!k)return [];return [...new Set(DATA.map(d=>String(d[k])))].sort();}
-function matchConditions(d){
-  const act=appliedConditions.filter(c=>c.field&&c.value);
-  if(!act.length) return true;
-  let res=null;
-  act.forEach(c=>{
-    const v=String(d[c.field]).toLowerCase(), cv=c.value.toLowerCase();
-    const m = c.op==='Contains'? v.includes(cv) : c.op==='Does not contain'? !v.includes(cv) : v===cv;
-    res = res===null? m : (c.connector==='or'? (res||m) : (res&&m));
-  });
-  return res;
-}
-function dd(type,i,value,placeholder,head,options){
-  const ph=!value;
-  const menu='<div class="dd-menu">'+(head?'<div class="dd-head">'+head+'</div>':'')+
-    options.map(o=>'<div class="dd-item'+(o===value?' selected':'')+'" data-val="'+esc(o)+'">'+esc(o)+(o===value?'<span class="ic" data-ic="check"></span>':'')+'</div>').join('')+'</div>';
-  return '<div class="dd dd-'+type+'" data-cond="'+i+'" data-type="'+type+'">'+
-    '<div class="dd-control'+(ph?' placeholder':'')+'"><span>'+esc(value||placeholder)+'</span><span class="ic" data-ic="chevron"></span></div>'+menu+'</div>';
-}
-function renderConditions(){
-  let html='';
-  conditions.forEach((c,i)=>{
-    if(i>0) html+='<div class="connector">'+dd('conn',i,c.connector,'and','',['and','or'])+'</div>';
-    html+='<div class="cond">'+
-      dd('field',i,fieldLabel(c.field),'Select Field Name','FIELD NAME',FIELDS.map(f=>f.label))+
-      dd('op',i,c.op,'Contains','OPERATORS',OPERATORS)+
-      dd('value',i,c.value,'Select Value','VALUE',distinctValues(c.field))+
-      (conditions.length>1?'<button class="remove-btn" data-remove="'+i+'"><span class="ic" data-ic="remove"></span></button>':'')+
-      '</div>';
-  });
-  const cont=document.getElementById('conditions');
-  cont.innerHTML=html; injectIcons(cont);
-  cont.classList.toggle('scroll', conditions.length>3); // fixed height + scroll past 3 filters
-  refreshApplyBtn();
-}
-function hasActiveFilters(){return conditions.some(c=>c.field&&c.value);}
-function refreshApplyBtn(){ document.getElementById('apply-filter').disabled = !hasActiveFilters(); }
-function closeMenus(){document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));}
-function updateFilterCount(){
-  const n=appliedConditions.filter(c=>c.field&&c.value).length;
-  const b=document.getElementById('filter-count');
-  if(n>0){b.textContent=n;b.style.display='';}else{b.style.display='none';}
-}
-function openFilter(){
-  renderConditions();
-  const modal=document.getElementById('filter-modal');
-  const btn=document.getElementById('filter-btn');
-  modal.classList.add('open'); btn.classList.add('open');
-  const r=btn.getBoundingClientRect();
-  const card=document.getElementById('filter-card');
-  card.style.top=(r.bottom+6)+'px';
-  const cw=card.offsetWidth;
-  let left=r.left;
-  if(left+cw>window.innerWidth-16) left=window.innerWidth-16-cw;
-  card.style.left=Math.max(16,left)+'px';
-  armFilterAutoClose(); // if the pointer isn't on the panel, start the dismiss countdown
-}
-let filterAutoCloseTimer=null, pointerOverFilter=false;
-const FILTER_AUTOCLOSE_MS=1000; // snappy delay before an idle/scrolled-away panel dismisses
-function filterIsOpen(){return document.getElementById('filter-modal').classList.contains('open');}
-function armFilterAutoClose(){
-  clearTimeout(filterAutoCloseTimer);
-  if(!filterIsOpen() || pointerOverFilter) return; // actively hovering/using the panel — keep it open
-  filterAutoCloseTimer=setTimeout(()=>{ if(filterIsOpen()) closeFilter(); }, FILTER_AUTOCLOSE_MS);
-}
-function cancelFilterAutoClose(){clearTimeout(filterAutoCloseTimer); filterAutoCloseTimer=null;}
-function closeFilter(){cancelFilterAutoClose();document.getElementById('filter-modal').classList.remove('open');document.getElementById('filter-btn').classList.remove('open');}
-document.getElementById('filter-btn').addEventListener('click',e=>{
-  e.stopPropagation();
-  if(document.getElementById('filter-modal').classList.contains('open')){closeFilter();}else{openFilter();}
-});
-document.getElementById('filter-modal').addEventListener('click',e=>{if(e.target.id==='filter-modal')closeFilter();});
-// Auto-close the filter a comfortable few seconds after the user scrolls away from it,
-// unless they are actively hovering/using the panel. Listen for the scroll GESTURES
-// (wheel/touch) plus scroll — gestures fire reliably even when a scroll event doesn't
-// propagate to window in this layout.
-['wheel','touchmove','scroll'].forEach(function(ev){
-  window.addEventListener(ev,function(){ if(filterIsOpen()) armFilterAutoClose(); },{capture:true,passive:true});
-});
-(function(){
-  // Keep the panel open while the pointer is over EITHER the panel or the Filter button.
-  const card=document.getElementById('filter-card');
-  const btn=document.getElementById('filter-btn');
-  [card,btn].forEach(function(el){
-    el.addEventListener('mouseenter',()=>{ pointerOverFilter=true; cancelFilterAutoClose(); });
-    el.addEventListener('mouseleave',()=>{ pointerOverFilter=false; armFilterAutoClose(); });
-  });
-})();
-document.getElementById('add-cond').addEventListener('click',()=>{conditions.push({field:'',op:'Contains',value:'',connector:'and'});renderConditions();});
-// Apply — commit the built filters to the grid, then dismiss. Disabled until >=1 filter set.
-document.getElementById('apply-filter').addEventListener('click',()=>{
-  if(!hasActiveFilters()) return;
-  appliedConditions=conditions.map(c=>({...c})); // commit the working state
-  render();      // refresh the grid now (and the count badge)
-  closeFilter(); // modal goes away
-});
-document.getElementById('close-filter').addEventListener('click',()=>{ closeFilter(); });
-document.getElementById('clear-all').addEventListener('click',()=>{
-  // Explicit reset: empty the builder AND the applied filter, then refresh the grid.
-  conditions=[{field:'',op:'Contains',value:'',connector:'and'}]; appliedConditions=[]; renderConditions(); render();
-});
-document.getElementById('conditions').addEventListener('click',e=>{
-  // NOTE: editing conditions updates the builder only — the grid is NOT refreshed
-  // until Apply is clicked.
-  const rm=e.target.closest('.remove-btn');
-  if(rm){conditions.splice(+rm.dataset.remove,1);renderConditions();return;}
-  const ctrl=e.target.closest('.dd-control');
-  if(ctrl){const d=ctrl.parentElement,open=d.classList.contains('open');closeMenus();if(!open)d.classList.add('open');e.stopPropagation();return;}
-  const item=e.target.closest('.dd-item');
-  if(item){const d=item.closest('.dd'),i=+d.dataset.cond,type=d.dataset.type,val=item.dataset.val;
-    if(type==='field'){conditions[i].field=fieldKey(val);conditions[i].value='';}
-    else if(type==='op')conditions[i].op=val;
-    else if(type==='value')conditions[i].value=val;
-    else if(type==='conn')conditions[i].connector=val;
-    closeMenus();renderConditions();}
-});
-document.addEventListener('click',closeMenus);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenus();closeFilter();}});
-
-injectIcons(document);
-updateHeaders();
-render();
-
-// ---- Templates view (DS "Standard Card - Default" tiles) ----
 const TEMPLATES = [
   {title:'Dev_Prod_Account_Template',   running:true},
   {title:'Dev_Prod_Account_Template_1', running:true},
@@ -537,48 +247,290 @@ const TEMPLATES = [
   {title:'Dev_Prod_Account_Template_7'},
 ].map(t=>Object.assign({object:'FinPlanDetail',ver:'V2.0',srcEnv:'Source Environment A',srcApp:'Joe_LCM_Source',tgtEnv:'Target Environment A',tgtApp:'Joe_LCM_Target'},t));
 
-function tileHtml(t){
-  return '<div class="tile'+(t.running?' running':'')+'">'
-    +'<div class="tile-top">'
-      +(t.running?'<span class="tile-status"><span class="ic" data-ic="clock"></span>Running</span>':'')
-      +'<span class="tile-ver">'+esc(t.ver)+'</span>'
-    +'</div>'
-    +'<div class="tile-title"><span class="ic" data-ic="docFile"></span><span class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</span></div>'
-    +'<div class="tile-object">Object: '+esc(t.object)+'</div>'
-    +'<div class="tile-st">'
-      +'<div class="st-panel st-source">'
-        +'<div class="st-row"><div class="st-label">Source Env</div><div class="st-value" title="'+esc(t.srcEnv)+'">'+esc(t.srcEnv)+'</div></div>'
-        +'<div class="st-row"><div class="st-label">Source App</div><div class="st-value" title="'+esc(t.srcApp)+'">'+esc(t.srcApp)+'</div></div>'
-      +'</div>'
-      +'<span class="st-chevron"><span class="ic" data-ic="chevR"></span></span>'
-      +'<div class="st-panel st-target">'
-        +'<div class="st-row"><div class="st-label">Target Env</div><div class="st-value" title="'+esc(t.tgtEnv)+'">'+esc(t.tgtEnv)+'</div></div>'
-        +'<div class="st-row"><div class="st-label">Target App</div><div class="st-value" title="'+esc(t.tgtApp)+'">'+esc(t.tgtApp)+'</div></div>'
-      +'</div>'
-    +'</div>'
-  +'</div>';
-}
-function renderTiles(){
-  const q=(document.getElementById('tpl-search').value||'').toLowerCase();
-  const list=TEMPLATES.filter(t=>!q||t.title.toLowerCase().includes(q));
-  const host=document.getElementById('tiles-grid');
-  host.innerHTML=list.length?list.map(tileHtml).join(''):'<div class="empty" style="padding:24px 0;color:#6E6E6E;">No matching templates.</div>';
-  injectIcons(host);
-}
-document.getElementById('tpl-search').addEventListener('input',renderTiles);
-renderTiles();
+const ARROW_DOWN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 12l6 6 6-6"/></svg>';
+const ARROW_UP = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 12l6-6 6 6"/></svg>';
+const ACT = ICONS.clipboard;
+const MEM = ICONS.userCircle;
+const WARN = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l6.5 12h-13z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M7.4 6h1.2v3.4H7.4zM7.4 10.6h1.2v1.2H7.4z"/></svg>';
+const OS_LOGO = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M7 15l10-6"/></svg>';
+const AVATAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="9" r="3.4"/><path d="M5.5 20c0-3.6 3-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/></svg>';
 
-// ---- View switching via sidebar nav ----
-function showView(name){
-  document.querySelectorAll('.content-view .view').forEach(v=>{ v.hidden = (v.id!=='view-'+name); });
-  document.querySelectorAll('.nav a[data-view]').forEach(a=>a.classList.toggle('active', a.dataset.view===name));
-  closeFilter();
+const fieldLabel = (k)=>{ const f=FIELDS.find(f=>f.key===k); return f?f.label:''; };
+const fieldKey = (l)=>{ const f=FIELDS.find(f=>f.label===l); return f?f.key:''; };
+const distinctValues = (k)=>{ if(!k) return []; return [...new Set(DATA.map(d=>String(d[k])))].sort(); };
+function matchConditions(applied, d){
+  const act = applied.filter(c=>c.field&&c.value);
+  if(!act.length) return true;
+  let res=null;
+  act.forEach(c=>{
+    const v=String(d[c.field]).toLowerCase(), cv=c.value.toLowerCase();
+    const m = c.op==='Contains'? v.includes(cv) : c.op==='Does not contain'? !v.includes(cv) : v===cv;
+    res = res===null? m : (c.connector==='or'? (res||m) : (res&&m));
+  });
+  return res;
 }
-document.querySelectorAll('.nav a[data-view]').forEach(a=>{
-  a.addEventListener('click',e=>{ e.preventDefault(); showView(a.dataset.view); });
-});
 
-console.log('%cLCM prototype — build 2026-07-22-s (filter: more space above footer)','color:#0A5DFF;font-weight:bold');
+/* ---------- Components ---------- */
+function Icon({name, svg, cls}){
+  const markup = svg || (name && ICONS[name]) || '';
+  return html`<span class=${'ic'+(cls?' '+cls:'')} dangerouslySetInnerHTML=${{__html: markup}}></span>`;
+}
+function Badges({status}){
+  return html`<div class="badges">${status.map(([t,c],i)=>html`
+    <span key=${i} class=${'badge '+c}>${c==='warning'? html`<span class="ic" style=${{width:'12px'}} dangerouslySetInnerHTML=${{__html: WARN}}></span>` : null}${t}</span>`)}</div>`;
+}
+function Dropdown({cls, value, placeholder, head, options, isOpen, onToggle, onPick}){
+  const ph = !value;
+  return html`<div class=${'dd '+cls+(isOpen?' open':'')}>
+    <div class=${'dd-control'+(ph?' placeholder':'')} onClick=${onToggle}><span>${value||placeholder}</span><${Icon} name="chevron"/></div>
+    <div class="dd-menu">
+      ${head? html`<div class="dd-head">${head}</div>` : null}
+      ${options.map(o=>html`<div key=${o} class=${'dd-item'+(o===value?' selected':'')} onClick=${()=>onPick(o)}>${o}${o===value? html`<${Icon} name="check"/>` : null}</div>`)}
+    </div>
+  </div>`;
+}
+function NavItem({view, curView, setView, icon, label, chev}){
+  return html`<a href="#" class=${view&&curView===view?'active':''} onClick=${(e)=>{ e.preventDefault(); if(view) setView(view); }}>
+    <${Icon} name=${icon} cls="i16"/>${label}${chev? html`<${Icon} name="chevron" cls="chev"/>` : null}
+  </a>`;
+}
+function Sidebar({view, setView}){
+  return html`<aside class="sidebar">
+    <div class="side-head"><${Icon} name="collapse" cls="i16"/></div>
+    <div class="brand"><div class="logo"><img src="logo.png" alt="Kopi-O" width="82" height="82"/></div><div class="name">Kopi-O</div></div>
+    <nav class="nav">
+      <${NavItem} icon="navHome" label="Home"/>
+      <div class="cat">MIGRATIONS</div>
+      <${NavItem} icon="navOpen" label="Open" chev=${true}/>
+      <${NavItem} icon="navClosed" label="Closed" chev=${true}/>
+      <div class="cat">ACTIVITY</div>
+      <${NavItem} view="activity" curView=${view} setView=${setView} icon="navActivity" label="Activity Log"/>
+      <div class="cat">TEMPLATE MANAGEMENT</div>
+      <${NavItem} view="templates" curView=${view} setView=${setView} icon="navTemplates" label="Templates"/>
+    </nav>
+    <div class="foot"><span class="os"><span dangerouslySetInnerHTML=${{__html: OS_LOGO}}></span>onestream</span><span class="ver">Version 0.1</span></div>
+  </aside>`;
+}
+function TopBar(){
+  return html`<header class="topbar">
+    <div class="title">Lifecycle Management (Product Mockup)</div>
+    <div class="search"><${Icon} name="search" cls="i16"/><input placeholder="Search user, environment, application, dimension…"/></div>
+    <div style=${{display:'flex',alignItems:'center',gap:'8px'}}>
+      <button class="btn primary"><${Icon} name="plus"/>Create</button>
+      <button class="btn"><${Icon} name="ai"/>Ask</button>
+      <button class="btn"><${Icon} name="bulb"/>Intent</button>
+      <div class="avatar"><${Icon} svg=${AVATAR} cls="i22"/></div>
+    </div>
+  </header>`;
+}
+function Tile({t}){
+  return html`<div class=${'tile'+(t.running?' running':'')}>
+    <div class="tile-top">
+      ${t.running? html`<span class="tile-status"><${Icon} name="clock"/>Running</span>` : null}
+      <span class="tile-ver">${t.ver}</span>
+    </div>
+    <div class="tile-title"><${Icon} name="docFile"/><span class="tt" title=${t.title}>${t.title}</span></div>
+    <div class="tile-object">Object: ${t.object}</div>
+    <div class="tile-st">
+      <div class="st-panel st-source">
+        <div class="st-row"><div class="st-label">Source Env</div><div class="st-value" title=${t.srcEnv}>${t.srcEnv}</div></div>
+        <div class="st-row"><div class="st-label">Source App</div><div class="st-value" title=${t.srcApp}>${t.srcApp}</div></div>
+      </div>
+      <span class="st-chevron"><${Icon} name="chevR"/></span>
+      <div class="st-panel st-target">
+        <div class="st-row"><div class="st-label">Target Env</div><div class="st-value" title=${t.tgtEnv}>${t.tgtEnv}</div></div>
+        <div class="st-row"><div class="st-label">Target App</div><div class="st-value" title=${t.tgtApp}>${t.tgtApp}</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+function TemplatesView({active}){
+  const [q,setQ] = useState('');
+  const list = TEMPLATES.filter(t=>!q || t.title.toLowerCase().includes(q.toLowerCase()));
+  return html`<section class="view" hidden=${!active}>
+    <h1 class="cv-heading">Templates</h1>
+    <p class="cv-body">Create and manage templates and template sets. Templates define individual, reusable migration configurations, while template sets group related templates for sequential use.</p>
+    <div class="content-actions">
+      <div class="ca-left">
+        <div class="field"><${Icon} name="search"/><input placeholder="Search templates" value=${q} onChange=${e=>setQ(e.target.value)}/></div>
+        <button class="btn sm"><${Icon} name="filter"/>Filter</button>
+      </div>
+      <div class="ca-right">
+        <button class="btn sm primary"><${Icon} name="plus"/>Create Template</button>
+        <button class="iconbtn dark"><${Icon} name="grid"/></button>
+        <button class="iconbtn"><${Icon} name="list"/></button>
+      </div>
+    </div>
+    <div class="tiles-grid">
+      ${list.length? list.map((t,i)=>html`<${Tile} key=${i} t=${t}/>`) : html`<div class="empty" style=${{padding:'24px 0',color:'#6E6E6E'}}>No matching templates.</div>`}
+    </div>
+  </section>`;
+}
+function ActivityView({active}){
+  const [search,setSearch] = useState('');
+  const [sortKey,setSortKey] = useState('start');
+  const [sortDir,setSortDir] = useState(-1);
+  const [conditions,setConditions] = useState([{field:'',op:'Contains',value:'',connector:'and'}]);
+  const [applied,setApplied] = useState([]);
+  const [filterOpen,setFilterOpen] = useState(false);
+  const [pos,setPos] = useState({top:0,left:0});
+  const [openDD,setOpenDD] = useState(null);
+  const [checked,setChecked] = useState(()=>new Set());
+  const btnRef = useRef(null);
+  const pointerOver = useRef(false);
+  const timer = useRef(null);
+
+  const rows = useMemo(()=>{
+    const q = search.toLowerCase();
+    const r = DATA.filter(d=> (!q || [d.id,d.type,d.template,d.object,d.user,d.start,d.statusText].join(' ').toLowerCase().includes(q)) && matchConditions(applied,d));
+    return r.slice().sort((a,b)=>{
+      const av = sortKey==='start'? a._sort : (sortKey==='id'? a.id : String(a[sortKey]).toLowerCase());
+      const bv = sortKey==='start'? b._sort : (sortKey==='id'? b.id : String(b[sortKey]).toLowerCase());
+      return av<bv? -sortDir : av>bv? sortDir : 0;
+    });
+  },[search,sortKey,sortDir,applied]);
+
+  const appliedCount = applied.filter(c=>c.field&&c.value).length;
+  const hasActive = conditions.some(c=>c.field&&c.value);
+  const allChecked = rows.length>0 && rows.every(r=>checked.has(r.id));
+
+  const cancelClose = useCallback(()=>{ if(timer.current){ clearTimeout(timer.current); timer.current=null; } },[]);
+  const armClose = useCallback(()=>{ cancelClose(); if(pointerOver.current) return; timer.current=setTimeout(()=>setFilterOpen(false),1000); },[cancelClose]);
+
+  function openFilter(){
+    const r = btnRef.current.getBoundingClientRect();
+    const cw = Math.min(560, window.innerWidth-32);
+    let left = r.left; if(left+cw>window.innerWidth-16) left = window.innerWidth-16-cw;
+    setPos({ top:r.bottom+6, left:Math.max(16,left) });
+    setOpenDD(null); setFilterOpen(true);
+  }
+  const toggleFilter = ()=> filterOpen? setFilterOpen(false) : openFilter();
+
+  useEffect(()=>{ if(!active) setFilterOpen(false); },[active]);
+
+  useEffect(()=>{
+    if(!filterOpen){ cancelClose(); setOpenDD(null); return; }
+    armClose(); // if the pointer isn't on the panel, start the dismiss countdown
+    const g = ()=>{ if(!pointerOver.current) armClose(); };
+    window.addEventListener('wheel',g,{capture:true,passive:true});
+    window.addEventListener('touchmove',g,{capture:true,passive:true});
+    window.addEventListener('scroll',g,{capture:true,passive:true});
+    const k = (e)=>{ if(e.key==='Escape'){ setOpenDD(null); setFilterOpen(false); } };
+    document.addEventListener('keydown',k);
+    return ()=>{
+      window.removeEventListener('wheel',g,{capture:true});
+      window.removeEventListener('touchmove',g,{capture:true});
+      window.removeEventListener('scroll',g,{capture:true});
+      document.removeEventListener('keydown',k);
+      cancelClose();
+    };
+  },[filterOpen,armClose,cancelClose]);
+
+  const sortBy = (k)=>{ if(sortKey===k) setSortDir(d=>-d); else { setSortKey(k); setSortDir(1); } };
+  const toggleAll = ()=> setChecked(prev=>{ const all=rows.every(r=>prev.has(r.id)); const n=new Set(prev); rows.forEach(r=> all? n.delete(r.id) : n.add(r.id)); return n; });
+  const toggleRow = (id)=> setChecked(prev=>{ const n=new Set(prev); n.has(id)? n.delete(id) : n.add(id); return n; });
+
+  // Builder editing — grid is NOT refreshed until Apply.
+  const patch = (i,p)=>{ setConditions(cs=>cs.map((c,j)=>j===i?{...c,...p}:c)); setOpenDD(null); };
+  const setField = (i,label)=>{ setConditions(cs=>cs.map((c,j)=>j===i?{...c,field:fieldKey(label),value:''}:c)); setOpenDD(null); };
+  const addCond = ()=> setConditions(cs=>[...cs,{field:'',op:'Contains',value:'',connector:'and'}]);
+  const removeCond = (i)=> setConditions(cs=>cs.filter((_,j)=>j!==i));
+  const clearAll = ()=>{ setConditions([{field:'',op:'Contains',value:'',connector:'and'}]); setApplied([]); };
+  const apply = ()=>{ if(!hasActive) return; setApplied(conditions.map(c=>({...c}))); setFilterOpen(false); };
+  const toggleDD = (id)=> setOpenDD(o=>o===id?null:id);
+
+  const panel = html`
+    <div class="modal-backdrop open" onClick=${e=>{ if(e.target===e.currentTarget) setFilterOpen(false); }}>
+      <div class="filter-card" style=${{top:pos.top+'px', left:pos.left+'px'}}
+        onClick=${e=>{ if(!e.target.closest('.dd')) setOpenDD(null); }}
+        onMouseEnter=${()=>{ pointerOver.current=true; cancelClose(); }}
+        onMouseLeave=${()=>{ pointerOver.current=false; armClose(); }}>
+        <div class="fc-head"><span class="title">Filter by</span><button class="clear" onClick=${()=>setFilterOpen(false)}>Close</button></div>
+        <div id="conditions" class=${conditions.length>3?'scroll':''}>
+          ${conditions.map((c,i)=>html`<${Fragment} key=${i}>
+            ${i>0? html`<div class="connector"><${Dropdown} cls="dd-conn" value=${c.connector} placeholder="and" options=${['and','or']} isOpen=${openDD==='conn-'+i} onToggle=${()=>toggleDD('conn-'+i)} onPick=${v=>patch(i,{connector:v})}/></div>` : null}
+            <div class="cond">
+              <${Dropdown} cls="dd-field" value=${fieldLabel(c.field)} placeholder="Select Field Name" head="FIELD NAME" options=${FIELDS.map(f=>f.label)} isOpen=${openDD==='field-'+i} onToggle=${()=>toggleDD('field-'+i)} onPick=${v=>setField(i,v)}/>
+              <${Dropdown} cls="dd-op" value=${c.op} placeholder="Contains" head="OPERATORS" options=${OPERATORS} isOpen=${openDD==='op-'+i} onToggle=${()=>toggleDD('op-'+i)} onPick=${v=>patch(i,{op:v})}/>
+              <${Dropdown} cls="dd-value" value=${c.value} placeholder="Select Value" head="VALUE" options=${distinctValues(c.field)} isOpen=${openDD==='value-'+i} onToggle=${()=>toggleDD('value-'+i)} onPick=${v=>patch(i,{value:v})}/>
+              ${conditions.length>1? html`<button class="remove-btn" onClick=${()=>removeCond(i)}><${Icon} name="remove"/></button>` : null}
+            </div>
+          <//>`)}
+        </div>
+        <div class="fc-footer">
+          <div class="fc-footer-left">
+            <button class="btn sm add-cond" onClick=${addCond}><${Icon} name="plus"/>Add Condition</button>
+            <button class="fc-link" onClick=${clearAll}>Clear All</button>
+          </div>
+          <button class="btn sm primary apply-btn" disabled=${!hasActive} onClick=${apply}>Apply</button>
+        </div>
+      </div>
+    </div>`;
+
+  return html`<section class="view" hidden=${!active}>
+    <h1 class="cv-heading">Activity Log</h1>
+    <p class="cv-body">View all closed migrations, individual activity, and member-level details. Sort and reorder columns, search, filter, and export content.</p>
+    <div class="content-actions">
+      <div class="ca-left">
+        <div class="field"><${Icon} name="search"/><input placeholder="Search activity" value=${search} onChange=${e=>setSearch(e.target.value)}/></div>
+        <button class=${'btn sm'+(filterOpen?' open':'')} id="filter-btn" ref=${btnRef}
+          onClick=${toggleFilter}
+          onMouseEnter=${()=>{ pointerOver.current=true; cancelClose(); }}
+          onMouseLeave=${()=>{ pointerOver.current=false; armClose(); }}>
+          <${Icon} name="filter"/>Filter${appliedCount>0? html`<span class="filter-count">${appliedCount}</span>` : null}<${Icon} name="chevron" cls="filter-chev"/>
+        </button>
+      </div>
+      <div class="ca-right">
+        <button class="btn sm primary"><${Icon} name="export"/>Export Member Details</button>
+        <button class="iconbtn dark"><${Icon} name="grid"/></button>
+        <button class="iconbtn"><${Icon} name="list"/></button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th class="col-chk"><input type="checkbox" checked=${allChecked} onChange=${toggleAll}/></th>
+          ${FIELDS.map(col=>html`<th key=${col.key} class=${'sortable'+(sortKey===col.key?' active':'')} onClick=${()=>sortBy(col.key)}>
+            <span class="th">${col.label} <span class="dir" dangerouslySetInnerHTML=${{__html: sortKey===col.key? (sortDir===1?ARROW_UP:ARROW_DOWN) : ''}}></span><${Icon} name="filter"/></span>
+          </th>`)}
+          <th></th>
+        </tr></thead>
+        <tbody>
+          ${rows.length? rows.map(d=>html`<tr key=${d.id}>
+            <td class="col-chk"><input type="checkbox" class="row-chk" checked=${checked.has(d.id)} onChange=${()=>toggleRow(d.id)}/></td>
+            <td class="id"><a href="#" onClick=${e=>e.preventDefault()}>${d.id}</a></td>
+            <td>${d.type}</td>
+            <td class="tmpl" title=${d.template}>${d.template}</td>
+            <td>${d.object}</td>
+            <td>${d.user}</td>
+            <td>${d.start}</td>
+            <td><${Badges} status=${d.status}/></td>
+            <td><div class="row-actions">
+              <button class="btn sm"><${Icon} svg=${ACT}/>Activity</button>
+              <button class="btn sm"><${Icon} svg=${MEM}/>Members</button>
+            </div></td>
+          </tr>`) : html`<tr><td colSpan="9" class="empty">No matching activity.</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+    ${filterOpen? createPortal(panel, document.body) : null}
+  </section>`;
+}
+function App(){
+  const [view,setView] = useState('activity');
+  return html`<div class="app">
+    <${Sidebar} view=${view} setView=${setView}/>
+    <div class="main">
+      <${TopBar}/>
+      <main class="content-view">
+        <${ActivityView} active=${view==='activity'}/>
+        <${TemplatesView} active=${view==='templates'}/>
+      </main>
+    </div>
+  </div>`;
+}
+createRoot(document.getElementById('root')).render(html`<${App}/>`);
+console.log('%cLCM prototype — build 2026-07-22-react-1 (build-less React port)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
