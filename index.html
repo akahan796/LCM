@@ -75,7 +75,7 @@
     </div>
 
     <div class="dsb-scroll">
-      <a class="dsb-item" href="/portal.html"><span class="ic" data-ic="back"></span><span class="lbl">Back to Portal</span></a>
+      <a class="dsb-item" id="back-to-portal" href="/portal.html"><span class="ic" data-ic="back"></span><span class="lbl">Back to Portal</span></a>
       <a class="dsb-item" href="/app.html" target="_blank" rel="noopener"><span class="ic" data-ic="external"></span><span class="lbl">Open prototype in new tab</span></a>
 
       <div class="dsb-cat">Screens</div>
@@ -131,6 +131,15 @@
   }
   setCollapsed((()=>{ try{ return localStorage.getItem('lcm_dsb_collapsed')==='1'; }catch(_){ return false; } })());
   collapseBtn.addEventListener('click', ()=> setCollapsed(!dsb.classList.contains('collapsed')));
+
+  // Back to Portal — close this tab (returns to the existing portal tab) rather than
+  // navigating, which would spawn a duplicate portal. Falls back to navigating if the
+  // tab can't be closed by script (e.g. the prototype was opened directly).
+  document.getElementById('back-to-portal').addEventListener('click', function(e){
+    e.preventDefault();
+    window.close();
+    setTimeout(function(){ location.href = '/portal.html'; }, 200);
+  });
 
   // UX Notes — toggle an (empty) notes area
   const uxNotes = document.getElementById('ux-notes'), uxArea = document.getElementById('ux-notes-area');
