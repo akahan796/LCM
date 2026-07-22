@@ -41,6 +41,8 @@
   .dsb-note b{color:var(--ink-strong);font-weight:600;}
   .dsb-empty{font-size:13px;color:var(--muted);padding:6px 12px 8px;}
   .dsb-notes-area{padding:2px 4px 4px;}
+  .dsb-sep{height:1px;background:var(--panel-line);margin:8px 12px;}
+  .dsb-stamp{font-size:11px;color:var(--muted);padding:0 12px 6px 44px;margin-top:-4px;}
   .dsb-info{font-size:12.5px;line-height:22px;color:var(--note);padding:2px 12px 4px;}
   .dsb-info .row{display:flex;gap:8px;}
   .dsb-info .k{color:var(--muted);flex:0 0 92px;}
@@ -56,6 +58,7 @@
   .dsb.collapsed .dsb-note,
   .dsb.collapsed .dsb-empty,
   .dsb.collapsed .dsb-notes-area,
+  .dsb.collapsed .dsb-stamp,
   .dsb.collapsed .dsb-info,
   .dsb.collapsed .dsb-foot span{display:none;}
   .dsb.collapsed .dsb-item{justify-content:center;padding:0;gap:0;}
@@ -99,8 +102,9 @@
       <a class="dsb-item" href="/app.html" target="_blank" rel="noopener"><span class="ic" data-ic="external"></span><span class="lbl">Open prototype in new tab</span></a>
 
       <div class="dsb-cat">Screens</div>
-      <button class="dsb-item nav active" data-view="activity"><span class="ic" data-ic="activity"></span><span class="lbl">Activity Log</span></button>
+      <button class="dsb-item nav active" data-view="activity"><span class="ic" data-ic="templates"></span><span class="lbl">Activity Log</span></button>
       <button class="dsb-item nav" data-view="templates"><span class="ic" data-ic="templates"></span><span class="lbl">Templates</span></button>
+      <div class="dsb-sep"></div>
       <div class="dsb-item dsb-toggle" id="ux-notes-row" role="button" tabindex="0" aria-label="Toggle UX Notes">
         <span class="ic" data-ic="note"></span><span class="lbl">UX Notes</span>
         <span class="switch on" id="ux-notes-switch" role="switch" aria-checked="true"><span class="knob"></span></span>
@@ -115,7 +119,9 @@
 
       <div class="dsb-cat">Downloads</div>
       <a class="dsb-item" href="/downloads/lcm-prototype-react.zip" download><span class="ic" data-ic="download"></span><span class="lbl">Prototype (React) — ZIP</span></a>
+      <div class="dsb-stamp">Updated Jul 22, 2026</div>
       <a class="dsb-item" href="/downloads/lcm-filter.zip" download><span class="ic" data-ic="download"></span><span class="lbl">Filter component — ZIP</span></a>
+      <div class="dsb-stamp">Updated Jul 22, 2026</div>
     </div>
 
     <div class="dsb-foot"><span class="ic" data-ic="info" style="display:inline-flex"></span><span>Preview frame · not part of the prototype</span></div>
