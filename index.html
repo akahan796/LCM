@@ -118,6 +118,8 @@
   .fc-head .title{font-size:14px; font-weight:700; color:#141414;}
   .fc-head .clear{font-size:13px; font-weight:700; color:var(--brand); background:none; border:0; cursor:pointer; padding:0;}
   .fc-sub{font-size:14px; color:#141414; margin:10px 0 12px;}
+  /* When more than 3 conditions exist, cap the height and scroll the parameters area. */
+  #conditions.scroll{max-height:180px; overflow-y:auto; overflow-x:hidden; padding-right:6px;}
   .cond{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
   .connector{margin-bottom:8px;}
   .remove-btn{background:none; border:0; cursor:pointer; color:#D0021B; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; padding:0; margin-left:2px;}
@@ -131,7 +133,7 @@
   .cond .dd-field, .cond .dd-value{flex:1 1 0; min-width:0;} .cond .dd-op{flex:0 0 116px;} .dd-conn{width:72px;}
   .filter-count{display:inline-flex; align-items:center; justify-content:center; min-width:16px; height:16px; padding:0 5px; border-radius:8px; background:var(--brand); color:#fff; font-size:11px; font-weight:700;}
   .filter-chev{transition:transform .15s ease;}
-  #filter-btn.open{border-color:var(--brand); color:var(--brand);}
+  #filter-btn.open{border-color:var(--brand); color:var(--brand); position:relative; z-index:101;}
   #filter-btn.open > .ic{color:var(--brand);}
   #filter-btn.open .filter-chev{transform:rotate(180deg);}
   .dd-menu{position:absolute; top:calc(100% + 4px); left:0; min-width:100%; background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.14); padding:4px 0; z-index:10; display:none;}
@@ -418,6 +420,7 @@ function renderConditions(){
   });
   const cont=document.getElementById('conditions');
   cont.innerHTML=html; injectIcons(cont);
+  cont.classList.toggle('scroll', conditions.length>3); // fixed height + scroll past 3 filters
   refreshClearBtn();
 }
 function hasActiveFilters(){return conditions.some(c=>c.field&&c.value);}
@@ -471,9 +474,13 @@ document.getElementById('filter-modal').addEventListener('click',e=>{if(e.target
   window.addEventListener(ev,function(){ if(filterIsOpen()) armFilterAutoClose(); },{capture:true,passive:true});
 });
 (function(){
+  // Keep the panel open while the pointer is over EITHER the panel or the Filter button.
   const card=document.getElementById('filter-card');
-  card.addEventListener('mouseenter',()=>{ pointerOverFilter=true; cancelFilterAutoClose(); });
-  card.addEventListener('mouseleave',()=>{ pointerOverFilter=false; armFilterAutoClose(); });
+  const btn=document.getElementById('filter-btn');
+  [card,btn].forEach(function(el){
+    el.addEventListener('mouseenter',()=>{ pointerOverFilter=true; cancelFilterAutoClose(); });
+    el.addEventListener('mouseleave',()=>{ pointerOverFilter=false; armFilterAutoClose(); });
+  });
 })();
 document.getElementById('add-cond').addEventListener('click',()=>{conditions.push({field:'',op:'Contains',value:'',connector:'and'});renderConditions();});
 document.getElementById('clear-filters').addEventListener('click',()=>{
@@ -554,7 +561,7 @@ document.querySelectorAll('.nav a[data-view]').forEach(a=>{
   a.addEventListener('click',e=>{ e.preventDefault(); showView(a.dataset.view); });
 });
 
-console.log('%cLCM prototype — build 2026-07-21-m (templates heading)','color:#0A5DFF;font-weight:bold');
+console.log('%cLCM prototype — build 2026-07-21-n (filter: fixed height + scroll, hover button retains)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
