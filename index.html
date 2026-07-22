@@ -117,7 +117,7 @@
   .fc-head{display:flex; align-items:center; justify-content:space-between;}
   .fc-head .title{font-size:14px; font-weight:700; color:#141414;}
   .fc-head .clear{font-size:13px; font-weight:700; color:var(--brand); background:none; border:0; cursor:pointer; padding:0;}
-  .fc-sub{font-size:14px; color:#141414; margin:10px 0 12px;}
+  #conditions{margin-top:14px;}
   /* When more than 3 conditions exist, cap the height and scroll the parameters area. */
   #conditions.scroll{max-height:180px; overflow-y:auto; overflow-x:hidden; padding-right:6px;}
   .cond{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
@@ -276,10 +276,9 @@
 <div class="modal-backdrop" id="filter-modal">
   <div class="filter-card" id="filter-card">
     <div class="fc-head">
-      <span class="title">Filters</span>
+      <span class="title">Filter by</span>
       <button class="clear" id="close-filter">Close</button>
     </div>
-    <div class="fc-sub">Filter by</div>
     <div id="conditions"></div>
     <div class="fc-footer">
       <div class="fc-footer-left">
@@ -579,7 +578,7 @@ document.querySelectorAll('.nav a[data-view]').forEach(a=>{
   a.addEventListener('click',e=>{ e.preventDefault(); showView(a.dataset.view); });
 });
 
-console.log('%cLCM prototype — build 2026-07-22-q (filter: Close top, Clear All + secondary Add Condition, grayed Apply)','color:#0A5DFF;font-weight:bold');
+console.log('%cLCM prototype — build 2026-07-22-r (filter: title \"Filter by\", removed sub-line)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
