@@ -113,12 +113,11 @@
   });
 
   host.addEventListener('click', function(e){
-    // Same-origin tiles (the prototype) open in a named, script-opened tab so it can
-    // close itself ("Back to Portal") and so repeat clicks reuse the same tab.
+    // Same-origin tile (the prototype) loads in THIS tab; external tiles keep target=_blank.
     var open = e.target.closest('.btn-open');
     if (open) {
       var href = open.getAttribute('href');
-      if (href && href.indexOf(location.origin) === 0) { e.preventDefault(); window.open(href, 'lcm_prototype'); }
+      if (href && href.indexOf(location.origin) === 0) { e.preventDefault(); window.location.href = href; }
       return;
     }
     var btn = e.target.closest('.btn-copy');

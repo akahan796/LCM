@@ -155,14 +155,7 @@
   setCollapsed((()=>{ try{ return localStorage.getItem('lcm_dsb_collapsed')==='1'; }catch(_){ return false; } })());
   collapseBtn.addEventListener('click', ()=> setCollapsed(!dsb.classList.contains('collapsed')));
 
-  // Back to Portal — close this tab (returns to the existing portal tab) rather than
-  // navigating, which would spawn a duplicate portal. Falls back to navigating if the
-  // tab can't be closed by script (e.g. the prototype was opened directly).
-  document.getElementById('back-to-portal').addEventListener('click', function(e){
-    e.preventDefault();
-    window.close();
-    setTimeout(function(){ location.href = '/portal.html'; }, 200);
-  });
+  // Back to Portal is a plain link to /portal.html — navigates in the same tab.
 
   // UX Notes — Figma-style comment pins over the prototype; the toggle shows/hides them.
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
