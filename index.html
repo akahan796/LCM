@@ -125,9 +125,12 @@
   .remove-btn{background:none; border:0; cursor:pointer; color:#D0021B; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; padding:0; margin-left:2px;}
   .add-cond{margin-top:4px;}
   .fc-footer{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px;}
+  .fc-footer-left{display:flex; align-items:center; gap:12px;}
   .fc-footer .add-cond{margin-top:0;}
-  .apply-btn:disabled{opacity:.45; cursor:default;}
-  .apply-btn:disabled:hover{background:var(--brand);}
+  .fc-link{font-size:13px; font-weight:700; color:var(--brand); background:none; border:0; cursor:pointer; padding:0;}
+  .fc-link:hover{text-decoration:underline;}
+  .apply-btn:disabled{background:#E6E6E6; border-color:#E6E6E6; color:#ABABAB; cursor:default;}
+  .apply-btn:disabled:hover{background:#E6E6E6;}
   .dd{position:relative;}
   .dd-control{display:flex; align-items:center; justify-content:space-between; gap:8px; height:28px; padding:0 10px; background:#fff; border:1px solid var(--line); border-radius:4px; cursor:pointer; font-size:14px; color:var(--text); user-select:none;}
   .dd-control > span:first-child{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
@@ -274,12 +277,15 @@
   <div class="filter-card" id="filter-card">
     <div class="fc-head">
       <span class="title">Filters</span>
-      <button class="clear" id="clear-filters">Clear all filters</button>
+      <button class="clear" id="close-filter">Close</button>
     </div>
     <div class="fc-sub">Filter by</div>
     <div id="conditions"></div>
     <div class="fc-footer">
-      <button class="btn sm primary add-cond" id="add-cond"><span class="ic" data-ic="plus"></span>Add Condition</button>
+      <div class="fc-footer-left">
+        <button class="btn sm add-cond" id="add-cond"><span class="ic" data-ic="plus"></span>Add Condition</button>
+        <button class="fc-link" id="clear-all">Clear All</button>
+      </div>
       <button class="btn sm primary apply-btn" id="apply-filter" disabled>Apply</button>
     </div>
   </div>
@@ -429,18 +435,10 @@ function renderConditions(){
   const cont=document.getElementById('conditions');
   cont.innerHTML=html; injectIcons(cont);
   cont.classList.toggle('scroll', conditions.length>3); // fixed height + scroll past 3 filters
-  refreshClearBtn();
   refreshApplyBtn();
 }
 function hasActiveFilters(){return conditions.some(c=>c.field&&c.value);}
 function refreshApplyBtn(){ document.getElementById('apply-filter').disabled = !hasActiveFilters(); }
-function refreshClearBtn(){
-  // "Clear all filters" only when a filter is actually set; otherwise "Close".
-  const b=document.getElementById('clear-filters');
-  const active=hasActiveFilters();
-  b.textContent=active?'Clear all filters':'Close';
-  b.classList.toggle('as-close',!active);
-}
 function closeMenus(){document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));}
 function updateFilterCount(){
   const n=appliedConditions.filter(c=>c.field&&c.value).length;
@@ -500,10 +498,10 @@ document.getElementById('apply-filter').addEventListener('click',()=>{
   render();      // refresh the grid now (and the count badge)
   closeFilter(); // modal goes away
 });
-document.getElementById('clear-filters').addEventListener('click',()=>{
-  // Clear is an explicit reset: empty the builder AND the applied filter, refresh grid.
-  if(hasActiveFilters()){conditions=[{field:'',op:'Contains',value:'',connector:'and'}];appliedConditions=[];renderConditions();render();}
-  else{closeFilter();}
+document.getElementById('close-filter').addEventListener('click',()=>{ closeFilter(); });
+document.getElementById('clear-all').addEventListener('click',()=>{
+  // Explicit reset: empty the builder AND the applied filter, then refresh the grid.
+  conditions=[{field:'',op:'Contains',value:'',connector:'and'}]; appliedConditions=[]; renderConditions(); render();
 });
 document.getElementById('conditions').addEventListener('click',e=>{
   // NOTE: editing conditions updates the builder only — the grid is NOT refreshed
@@ -581,7 +579,7 @@ document.querySelectorAll('.nav a[data-view]').forEach(a=>{
   a.addEventListener('click',e=>{ e.preventDefault(); showView(a.dataset.view); });
 });
 
-console.log('%cLCM prototype — build 2026-07-22-p (filter: Apply button, commit-on-apply)','color:#0A5DFF;font-weight:bold');
+console.log('%cLCM prototype — build 2026-07-22-q (filter: Close top, Clear All + secondary Add Condition, grayed Apply)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
