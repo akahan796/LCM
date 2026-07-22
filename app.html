@@ -387,7 +387,6 @@ function ActivityView({active}){
   const [sortKey,setSortKey] = useState('start');
   const [sortDir,setSortDir] = useState(-1);
   const [conditions,setConditions] = useState([{field:'',op:'Contains',value:[],connector:'and'}]);
-  const [applied,setApplied] = useState([]);
   const [filterOpen,setFilterOpen] = useState(false);
   const [pos,setPos] = useState({top:0,left:0});
   const [openDD,setOpenDD] = useState(null);
@@ -398,16 +397,15 @@ function ActivityView({active}){
 
   const rows = useMemo(()=>{
     const q = search.toLowerCase();
-    const r = DATA.filter(d=> (!q || [d.id,d.type,d.template,d.object,d.user,d.start,d.statusText].join(' ').toLowerCase().includes(q)) && matchConditions(applied,d));
+    const r = DATA.filter(d=> (!q || [d.id,d.type,d.template,d.object,d.user,d.start,d.statusText].join(' ').toLowerCase().includes(q)) && matchConditions(conditions,d));
     return r.slice().sort((a,b)=>{
       const av = sortKey==='start'? a._sort : (sortKey==='id'? a.id : String(a[sortKey]).toLowerCase());
       const bv = sortKey==='start'? b._sort : (sortKey==='id'? b.id : String(b[sortKey]).toLowerCase());
       return av<bv? -sortDir : av>bv? sortDir : 0;
     });
-  },[search,sortKey,sortDir,applied]);
+  },[search,sortKey,sortDir,conditions]);
 
-  const appliedCount = applied.filter(c=>c.field&&c.value.length).length;
-  const hasActive = conditions.some(c=>c.field&&c.value.length);
+  const activeCount = conditions.filter(c=>c.field&&c.value.length).length;
   const allChecked = rows.length>0 && rows.every(r=>checked.has(r.id));
 
   const cancelClose = useCallback(()=>{ if(timer.current){ clearTimeout(timer.current); timer.current=null; } },[]);
@@ -452,8 +450,7 @@ function ActivityView({active}){
   const toggleValue = (i,v)=> setConditions(cs=>cs.map((c,j)=>{ if(j!==i) return c; const has=c.value.includes(v); return {...c, value: has? c.value.filter(x=>x!==v) : [...c.value, v]}; })); // multi-select: keep menu open
   const addCond = ()=> setConditions(cs=>[...cs,{field:'',op:'Contains',value:[],connector:'and'}]);
   const removeCond = (i)=> setConditions(cs=>cs.filter((_,j)=>j!==i));
-  const clearAll = ()=>{ setConditions([{field:'',op:'Contains',value:[],connector:'and'}]); setApplied([]); };
-  const apply = ()=>{ if(!hasActive) return; setApplied(conditions.map(c=>({...c, value:[...c.value]}))); setFilterOpen(false); };
+  const clearAll = ()=>{ setConditions([{field:'',op:'Contains',value:[],connector:'and'}]); };
   const toggleDD = (id)=> setOpenDD(o=>o===id?null:id);
 
   const panel = html`
@@ -479,7 +476,6 @@ function ActivityView({active}){
             <button class="btn sm add-cond" onClick=${addCond}><${Icon} name="plus"/>Add Condition</button>
             <button class="fc-link" onClick=${clearAll}>Clear All</button>
           </div>
-          <button class="btn sm primary apply-btn" disabled=${!hasActive} onClick=${apply}>Apply</button>
         </div>
       </div>
     </div>`;
@@ -494,7 +490,7 @@ function ActivityView({active}){
           onClick=${toggleFilter}
           onMouseEnter=${()=>{ pointerOver.current=true; cancelClose(); }}
           onMouseLeave=${()=>{ pointerOver.current=false; armClose(); }}>
-          <${Icon} name="filter"/>Filter${appliedCount>0? html`<span class="filter-count">${appliedCount}</span>` : null}<${Icon} name="chevron" cls="filter-chev"/>
+          <${Icon} name="filter"/>Filter${activeCount>0? html`<span class="filter-count">${activeCount}</span>` : null}<${Icon} name="chevron" cls="filter-chev"/>
         </button>
       </div>
       <div class="ca-right">
@@ -556,7 +552,7 @@ function App(){
   </div>`;
 }
 createRoot(document.getElementById('root')).render(html`<${App}/>`);
-console.log('%cLCM prototype (app.html) — build 2026-07-22-react-3 (frame nav hook)','color:#0A5DFF;font-weight:bold');
+console.log('%cLCM prototype (app.html) — build 2026-07-22-react-4 (filter auto-refresh, no Apply)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
