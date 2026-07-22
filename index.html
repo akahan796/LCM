@@ -161,12 +161,10 @@
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   const COMMENT_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C7 4 3 7.1 3 11c0 1.9 1 3.6 2.6 4.9L5 20l4.4-2.2c.83.2 1.7.3 2.6.3 5 0 9-3.1 9-7s-4-7-9-7z"/></svg>';
   // Designer comments — {x,y} are pixels from the top-left of the prototype area. Edit freely.
-  // xPct = % across the prototype area (keeps pins on-screen at any width); y = px from top.
-  const COMMENTS = [
-    { xPct:24, y:150, who:'UX · Navigation', text:'Selected nav uses a subtle grey pill — good contrast without competing with content.' },
-    { xPct:58, y:150, who:'UX · Filters',    text:'Field locks after the first selection and Value is multi-select. Nothing applies until “Apply”.' },
-    { xPct:42, y:255, who:'UX · Table',      text:'Row density reads well for scanning. Consider a clearer empty state when a filter returns nothing.' },
-  ];
+  // Designer comments — add entries here to place Figma-style pins over the prototype.
+  // Each: { xPct: <% across the prototype area>, y: <px from top>, who: '...', text: '...' }.
+  // Empty for now (no notes to share yet); the toggle + pin/popover styling stay in place.
+  const COMMENTS = [];
   const layer = document.getElementById('comment-layer');
   layer.innerHTML = COMMENTS.map(function(c,i){
     var flip = c.xPct >= 55 ? ' flip' : '';
