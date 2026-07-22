@@ -150,6 +150,11 @@
   .dd-item:hover{background:#F4F7FF;}
   .dd-item.selected{color:var(--brand);}
   .dd-item .ic{color:var(--brand);}
+  .dd-item-multi{justify-content:flex-start; gap:10px;}
+  .dd-check{width:16px; height:16px; accent-color:var(--brand); pointer-events:none; flex:0 0 auto; margin:0;}
+  .dd-control.disabled{background:#F2F2F2; cursor:default; color:#6E6E6E;}
+  .dd-control.disabled:hover{background:#F2F2F2;}
+  .dd-control.disabled .ic{color:#C8C8C8;}
   /* Templates view */
   .view[hidden]{display:none;}
   .cv-eyebrow{font-size:14px; color:#6E6E6E; margin:0 0 8px;}
@@ -259,12 +264,16 @@ const fieldLabel = (k)=>{ const f=FIELDS.find(f=>f.key===k); return f?f.label:''
 const fieldKey = (l)=>{ const f=FIELDS.find(f=>f.label===l); return f?f.key:''; };
 const distinctValues = (k)=>{ if(!k) return []; return [...new Set(DATA.map(d=>String(d[k])))].sort(); };
 function matchConditions(applied, d){
-  const act = applied.filter(c=>c.field&&c.value);
+  const act = applied.filter(c=>c.field && c.value && c.value.length);
   if(!act.length) return true;
   let res=null;
   act.forEach(c=>{
-    const v=String(d[c.field]).toLowerCase(), cv=c.value.toLowerCase();
-    const m = c.op==='Contains'? v.includes(cv) : c.op==='Does not contain'? !v.includes(cv) : v===cv;
+    const v = String(d[c.field]).toLowerCase();
+    const vals = c.value.map(x=>String(x).toLowerCase());
+    let m;
+    if(c.op==='Contains') m = vals.some(x=>v.includes(x));            // any selected value contained
+    else if(c.op==='Does not contain') m = vals.every(x=>!v.includes(x)); // none contained
+    else m = vals.some(x=>v===x);                                     // Equals: any-of
     res = res===null? m : (c.connector==='or'? (res||m) : (res&&m));
   });
   return res;
@@ -279,13 +288,20 @@ function Badges({status}){
   return html`<div class="badges">${status.map(([t,c],i)=>html`
     <span key=${i} class=${'badge '+c}>${c==='warning'? html`<span class="ic" style=${{width:'12px'}} dangerouslySetInnerHTML=${{__html: WARN}}></span>` : null}${t}</span>`)}</div>`;
 }
-function Dropdown({cls, value, placeholder, head, options, isOpen, onToggle, onPick}){
-  const ph = !value;
+function Dropdown({cls, value, placeholder, head, options, isOpen, onToggle, onPick, multi, disabled}){
+  const arr = multi ? (value||[]) : null;
+  const isSel = (o)=> multi ? arr.includes(o) : o===value;
+  const display = multi ? (arr.length? arr.join(', ') : placeholder) : (value||placeholder);
+  const ph = multi ? arr.length===0 : !value;
   return html`<div class=${'dd '+cls+(isOpen?' open':'')}>
-    <div class=${'dd-control'+(ph?' placeholder':'')} onClick=${onToggle}><span>${value||placeholder}</span><${Icon} name="chevron"/></div>
+    <div class=${'dd-control'+(ph?' placeholder':'')+(disabled?' disabled':'')} onClick=${disabled?null:onToggle}>
+      <span>${display}</span><${Icon} name="chevron"/>
+    </div>
     <div class="dd-menu">
       ${head? html`<div class="dd-head">${head}</div>` : null}
-      ${options.map(o=>html`<div key=${o} class=${'dd-item'+(o===value?' selected':'')} onClick=${()=>onPick(o)}>${o}${o===value? html`<${Icon} name="check"/>` : null}</div>`)}
+      ${options.map(o=>html`<div key=${o} class=${'dd-item'+(multi?' dd-item-multi':'')+(isSel(o)?' selected':'')} onClick=${()=>onPick(o)}>
+        ${multi? html`<input type="checkbox" class="dd-check" checked=${isSel(o)} readOnly tabindex="-1"/>` : null}<span>${o}</span>${(!multi && isSel(o))? html`<${Icon} name="check"/>` : null}
+      </div>`)}
     </div>
   </div>`;
 }
@@ -370,7 +386,7 @@ function ActivityView({active}){
   const [search,setSearch] = useState('');
   const [sortKey,setSortKey] = useState('start');
   const [sortDir,setSortDir] = useState(-1);
-  const [conditions,setConditions] = useState([{field:'',op:'Contains',value:'',connector:'and'}]);
+  const [conditions,setConditions] = useState([{field:'',op:'Contains',value:[],connector:'and'}]);
   const [applied,setApplied] = useState([]);
   const [filterOpen,setFilterOpen] = useState(false);
   const [pos,setPos] = useState({top:0,left:0});
@@ -390,8 +406,8 @@ function ActivityView({active}){
     });
   },[search,sortKey,sortDir,applied]);
 
-  const appliedCount = applied.filter(c=>c.field&&c.value).length;
-  const hasActive = conditions.some(c=>c.field&&c.value);
+  const appliedCount = applied.filter(c=>c.field&&c.value.length).length;
+  const hasActive = conditions.some(c=>c.field&&c.value.length);
   const allChecked = rows.length>0 && rows.every(r=>checked.has(r.id));
 
   const cancelClose = useCallback(()=>{ if(timer.current){ clearTimeout(timer.current); timer.current=null; } },[]);
@@ -432,11 +448,12 @@ function ActivityView({active}){
 
   // Builder editing — grid is NOT refreshed until Apply.
   const patch = (i,p)=>{ setConditions(cs=>cs.map((c,j)=>j===i?{...c,...p}:c)); setOpenDD(null); };
-  const setField = (i,label)=>{ setConditions(cs=>cs.map((c,j)=>j===i?{...c,field:fieldKey(label),value:''}:c)); setOpenDD(null); };
-  const addCond = ()=> setConditions(cs=>[...cs,{field:'',op:'Contains',value:'',connector:'and'}]);
+  const setField = (i,label)=>{ setConditions(cs=>cs.map((c,j)=>j===i?{...c,field:fieldKey(label),value:[]}:c)); setOpenDD(null); };
+  const toggleValue = (i,v)=> setConditions(cs=>cs.map((c,j)=>{ if(j!==i) return c; const has=c.value.includes(v); return {...c, value: has? c.value.filter(x=>x!==v) : [...c.value, v]}; })); // multi-select: keep menu open
+  const addCond = ()=> setConditions(cs=>[...cs,{field:'',op:'Contains',value:[],connector:'and'}]);
   const removeCond = (i)=> setConditions(cs=>cs.filter((_,j)=>j!==i));
-  const clearAll = ()=>{ setConditions([{field:'',op:'Contains',value:'',connector:'and'}]); setApplied([]); };
-  const apply = ()=>{ if(!hasActive) return; setApplied(conditions.map(c=>({...c}))); setFilterOpen(false); };
+  const clearAll = ()=>{ setConditions([{field:'',op:'Contains',value:[],connector:'and'}]); setApplied([]); };
+  const apply = ()=>{ if(!hasActive) return; setApplied(conditions.map(c=>({...c, value:[...c.value]}))); setFilterOpen(false); };
   const toggleDD = (id)=> setOpenDD(o=>o===id?null:id);
 
   const panel = html`
@@ -450,9 +467,9 @@ function ActivityView({active}){
           ${conditions.map((c,i)=>html`<${Fragment} key=${i}>
             ${i>0? html`<div class="connector"><${Dropdown} cls="dd-conn" value=${c.connector} placeholder="and" options=${['and','or']} isOpen=${openDD==='conn-'+i} onToggle=${()=>toggleDD('conn-'+i)} onPick=${v=>patch(i,{connector:v})}/></div>` : null}
             <div class="cond">
-              <${Dropdown} cls="dd-field" value=${fieldLabel(c.field)} placeholder="Select Field Name" head="FIELD NAME" options=${FIELDS.map(f=>f.label)} isOpen=${openDD==='field-'+i} onToggle=${()=>toggleDD('field-'+i)} onPick=${v=>setField(i,v)}/>
+              <${Dropdown} cls="dd-field" disabled=${!!c.field} value=${fieldLabel(c.field)} placeholder="Select Field Name" head="FIELD NAME" options=${FIELDS.map(f=>f.label)} isOpen=${openDD==='field-'+i} onToggle=${()=>toggleDD('field-'+i)} onPick=${v=>setField(i,v)}/>
               <${Dropdown} cls="dd-op" value=${c.op} placeholder="Contains" head="OPERATORS" options=${OPERATORS} isOpen=${openDD==='op-'+i} onToggle=${()=>toggleDD('op-'+i)} onPick=${v=>patch(i,{op:v})}/>
-              <${Dropdown} cls="dd-value" value=${c.value} placeholder="Select Value" head="VALUE" options=${distinctValues(c.field)} isOpen=${openDD==='value-'+i} onToggle=${()=>toggleDD('value-'+i)} onPick=${v=>patch(i,{value:v})}/>
+              <${Dropdown} cls="dd-value" multi=${true} value=${c.value} placeholder="Select Value" head="VALUE" options=${distinctValues(c.field)} isOpen=${openDD==='value-'+i} onToggle=${()=>toggleDD('value-'+i)} onPick=${v=>toggleValue(i,v)}/>
               ${conditions.length>1? html`<button class="remove-btn" onClick=${()=>removeCond(i)}><${Icon} name="remove"/></button>` : null}
             </div>
           <//>`)}
@@ -530,7 +547,7 @@ function App(){
   </div>`;
 }
 createRoot(document.getElementById('root')).render(html`<${App}/>`);
-console.log('%cLCM prototype — build 2026-07-22-react-1 (build-less React port)','color:#0A5DFF;font-weight:bold');
+console.log('%cLCM prototype — build 2026-07-22-react-2 (filter: lock field, multi-select value)','color:#0A5DFF;font-weight:bold');
 </script>
 </body>
 </html>
